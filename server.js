@@ -94,6 +94,11 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (ruta === '/api/pedidos' && req.method === 'GET') {
+      const ids = url.searchParams.get('ids');
+      if (ids) {
+        const lista = ids.split(',').map((s) => s.trim()).filter(Boolean);
+        return json(res, 200, { pedidos: pedidos.filter((p) => lista.includes(p.id)) });
+      }
       return json(res, 200, { pedidos });
     }
 
@@ -102,7 +107,17 @@ const server = http.createServer(async (req, res) => {
       if (!body.tipo || !body.base || !body.total) {
         return json(res, 400, { error: 'Faltan datos del pedido' });
       }
-      const id = 'YOG-' + contador++;
+      // El cliente propone su id: si ya existe, devolvemos el pedido (reintento sin duplicar)
+      let id;
+      if (typeof body.id === 'string' && /^YOG-[A-Za-z0-9-]{2,20}$/.test(body.id)) {
+        const existente = pedidos.find((p) => p.id === body.id);
+        if (existente) return json(res, 200, { pedido: existente, yaExiste: true });
+        id = body.id;
+        const num = parseInt(id.replace('YOG-', ''), 10);
+        if (!isNaN(num) && num >= contador) contador = num + 1;
+      } else {
+        id = 'YOG-' + contador++;
+      }
       const pedido = {
         id,
         tipo: body.tipo,

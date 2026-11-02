@@ -223,6 +223,25 @@
   .resumen-ticket .total { font-weight: 800; font-size: 15px; border-top: 1px solid #bcdcec; margin-top: 6px; padding-top: 8px; color: var(--azul-oscuro); }
   .mensaje-qr { font-size: 13px; color: var(--gris); }
 
+  .btn-principal:disabled { opacity: .55; cursor: wait; }
+
+  .mini-ticket {
+    background: #fff;
+    border: 2px dashed var(--azul);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+    box-shadow: var(--sombra);
+  }
+  .mini-ticket-top { display: flex; justify-content: space-between; align-items: center; }
+  .mini-ticket-top strong { font-size: 15px; }
+  .estado-txt { font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; }
+  .mini-ticket-desc { font-size: 12.5px; color: var(--gris); margin: 6px 0 4px; }
+  .qr-mini { display: flex; justify-content: center; margin-top: 10px; }
+  .qr-mini img { border-radius: 8px; }
+  .vacio-tickets { text-align: center; color: var(--gris); padding: 28px 12px; font-size: 14px; line-height: 1.6; }
+
   /* ---------- Navegación inferior ---------- */
   .nav-inferior {
     position: fixed;
@@ -291,7 +310,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 4h12l-1.5 16a2 2 0 0 1-2 1.8h-5A2 2 0 0 1 7.5 20L6 4z"/><path d="M7 9h10"/><circle cx="10" cy="6.5" r="1" fill="#fff"/><circle cx="14" cy="6.5" r="1" fill="#fff"/></svg>
       </div>
       <div class="info-producto">
-        <h3>Vaso Estándar</h3>
+        <h3>Vaso Estandar</h3>
         <p>Yogurt griego · 1 fruta · granola</p>
       </div>
       <span class="precio">$4.500</span>
@@ -383,22 +402,14 @@
     </div>
 
     <div style="height:12px;"></div>
-    <button class="btn-principal" onclick="confirmarPedido()">Confirmar pedido Pick &amp; Go</button>
+    <button class="btn-principal" id="btn-confirmar" onclick="confirmarPedido()">Confirmar pedido Pick &amp; Go</button>
   </section>
 
-  <!-- ============ TICKET ============ -->
+  <!-- ============ MIS TICKETS ============ -->
   <section id="view-ticket" class="seccion">
-    <div class="ticket">
-      <h2>¡Pedido confirmado!</h2>
-      <p class="orden">Orden <strong id="ticket-id">#YOG-104</strong></p>
-
-      <div id="qr-ticket"></div>
-
-      <div class="resumen-ticket" id="ticket-resumen"></div>
-
-      <p class="mensaje-qr">Muestra este código QR en el stand de YogApp para retirar tu vaso en menos de 30 segundos.</p>
-    </div>
-
+    <h2 class="titulo-seccion">Mis tickets</h2>
+    <p class="subtitulo">Todos tus pedidos con su código QR de retiro en el stand.</p>
+    <div id="lista-tickets"></div>
     <button class="btn-secundario" onclick="nuevoPedido()">Hacer otro pedido</button>
   </section>
 
@@ -424,7 +435,6 @@
 <script>
 const PRECIO_BASE = 4500;
 const seleccion = { base: { valor: 'Yogurt griego', precio: 0 }, frutas: [], cereales: [] };
-let ultimoPedido = null;
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -438,6 +448,7 @@ function cambiarVista(id) {
   document.getElementById(id).classList.add('activa');
   document.querySelectorAll('.nav-item').forEach((n) => n.classList.toggle('activa', n.dataset.view === id));
   window.scrollTo(0, 0);
+  if (id === 'view-ticket') cargarMisTickets();
 }
 
 function irArmar(tipo) {
@@ -497,9 +508,33 @@ function actualizarPrecio() {
     'Base $4.500' + (extras > 0 ? ` + ${extras} topping${extras > 1 ? 's' : ''}` : '');
 }
 
+function misIds() {
+  try { return JSON.parse(localStorage.getItem('yogapp_pedidos') || '[]'); }
+  catch { return []; }
+}
+
+function guardarId(id) {
+  const ids = misIds();
+  if (!ids.includes(id)) {
+    ids.unshift(id);
+    localStorage.setItem('yogapp_pedidos', JSON.stringify(ids.slice(0, 20)));
+  }
+}
+
+function qrImg(url, scale) {
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  return qr.createImgTag(scale, 6);
+}
+
 async function confirmarPedido() {
+  const btn = document.getElementById('btn-confirmar');
   const pedido = {
-    tipo: seleccion.base.valor === 'Yogurt griego' && seleccion.frutas.length <= 1 ? 'Vaso Estándar' : 'Vaso Personalizado',
+    // El id lo genera el cliente: si el servidor se duerme y hay que reintentar,
+    // el mismo número se reutiliza y el pedido nunca se duplica
+    id: 'YOG-' + Date.now().toString().slice(-6),
+    tipo: seleccion.base.valor === 'Yogurt griego' && seleccion.frutas.length <= 1 ? 'Vaso Estandar' : 'Vaso Personalizado',
     base: seleccion.base.valor,
     frutas: seleccion.frutas.map((i) => i.valor),
     cereales: seleccion.cereales.map((i) => i.valor),
@@ -508,44 +543,76 @@ async function confirmarPedido() {
     total: calcularTotal(),
   };
 
-  try {
-    const res = await fetch('/api/pedidos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(pedido),
-    });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    ultimoPedido = data.pedido;
-    mostrarTicket(data.pedido);
-  } catch {
-    toast('No se pudo enviar el pedido. Verifica la conexión.');
+  btn.disabled = true;
+  const textoOriginal = btn.textContent;
+  btn.textContent = 'Enviando pedido…';
+
+  let data = null;
+  for (let intento = 1; intento <= 3 && !data; intento++) {
+    try {
+      const res = await fetch('/api/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pedido),
+      });
+      if (!res.ok) throw new Error();
+      data = await res.json();
+    } catch {
+      if (intento < 3) {
+        toast('El servidor está despertando… reintento ' + intento + ' de 2');
+        await new Promise((r) => setTimeout(r, 5000));
+      }
+    }
   }
+
+  btn.disabled = false;
+  btn.textContent = textoOriginal;
+
+  if (!data) {
+    toast('No se pudo enviar el pedido. Revisa tu conexión a internet.');
+    return;
+  }
+
+  guardarId(data.pedido.id);
+  toast('Pedido enviado a cocina');
+  cambiarVista('view-ticket');
 }
 
-function mostrarTicket(pedido) {
-  document.getElementById('ticket-id').textContent = '#' + pedido.id;
+async function cargarMisTickets() {
+  const cont = document.getElementById('lista-tickets');
+  const ids = misIds();
+  if (!ids.length) {
+    cont.innerHTML = '<div class="vacio-tickets">Aún no tienes pedidos.<br>¡Arma tu primer vaso en la pestaña "Arma tu Vaso"!</div>';
+    return;
+  }
 
-  const filas = [
-    ['Base', pedido.base],
-    ['Frutas', pedido.frutas.join(', ') || 'Sin frutas'],
-    ['Cereales', pedido.cereales.join(', ') || 'Sin cereales'],
-    ['Retiro', pedido.horaRetiro],
-    ['Pago', pedido.pago],
-  ];
-  document.getElementById('ticket-resumen').innerHTML =
-    filas.map(([k, v]) => `<div><span><strong>${k}:</strong></span><span>${v}</span></div>`).join('') +
-    `<div class="total"><span>Total</span><span>$${pedido.total.toLocaleString('es-CO')}</span></div>`;
+  let pedidos = [];
+  try {
+    const res = await fetch('/api/pedidos?ids=' + ids.join(','));
+    if (res.ok) pedidos = (await res.json()).pedidos;
+  } catch { /* si no hay conexión, mostramos lo que tengamos */ }
 
-  // QR con la URL de entrega: al escanearlo se marca como entregado
-  const urlEntrega = location.origin + '/entrega?id=' + encodeURIComponent(pedido.id);
-  const qr = qrcode(0, 'M');
-  qr.addData(urlEntrega);
-  qr.make();
-  document.getElementById('qr-ticket').innerHTML = qr.createImgTag(5, 8);
-
-  cambiarVista('view-ticket');
-  toast('Pedido enviado a cocina');
+  cont.innerHTML = ids.map((id) => {
+    const p = pedidos.find((x) => x.id === id);
+    if (!p) {
+      return `<div class="mini-ticket">
+        <div class="mini-ticket-top"><strong>#${id}</strong></div>
+        <div class="mini-ticket-desc">Estado no disponible sin conexión</div>
+      </div>`;
+    }
+    const entregado = p.estado === 'Entregado';
+    return `<div class="mini-ticket">
+      <div class="mini-ticket-top">
+        <strong>#${p.id}</strong>
+        <span class="estado-txt" style="color:${entregado ? '#2c9e63' : '#b06f1f'};">${p.estado}</span>
+      </div>
+      <div class="mini-ticket-desc">${p.tipo} · ${p.base} · ${p.frutas.join(', ') || 'sin frutas'} · <strong>$${p.total.toLocaleString('es-CO')}</strong></div>
+      ${entregado
+        ? '<div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Entregado. ¡Buen provecho!</div>'
+        : `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
+           <div class="mensaje-qr">Muestra este QR en el stand para retirar tu vaso</div>`}
+    </div>`;
+  }).join('');
 }
 
 function nuevoPedido() {

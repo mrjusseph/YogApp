@@ -103,6 +103,32 @@
   .pedido-total { font-weight: 800; color: var(--azul-oscuro); font-size: 15px; }
   .vacio { text-align: center; color: var(--gris); padding: 30px 10px; font-size: 14px; }
 
+  /* ---------- Historial desplazable ---------- */
+  #lista-pedidos {
+    max-height: 62vh;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  #lista-pedidos::-webkit-scrollbar { width: 8px; }
+  #lista-pedidos::-webkit-scrollbar-thumb { background: #c8e2ec; border-radius: 99px; }
+  #lista-pedidos::-webkit-scrollbar-thumb:hover { background: var(--azul); }
+
+  /* ---------- Entrega ---------- */
+  .btn-entregar {
+    background: #2c9e63;
+    color: #fff;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 11px;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(44,154,99,.35);
+  }
+  .btn-entregar:active { transform: scale(.95); }
+  .btn-entregar:disabled { opacity: .6; }
+
   /* ---------- Inventario ---------- */
   .inv-item { margin-bottom: 12px; }
   .inv-info { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 5px; }
@@ -194,6 +220,41 @@
 let pedidosVistos = new Set();
 let primeraCarga = true;
 
+function beep(frecuencia, duracion) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = frecuencia;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duracion);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duracion);
+  } catch { /* sin sonido no pasa nada */ }
+}
+
+// ---------- Entrega con un solo toque ----------
+async function marcarEntregado(id, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Entregando…';
+  try {
+    const res = await fetch('/api/pedidos/' + encodeURIComponent(id) + '/entregar', { method: 'POST' });
+    if (res.ok) {
+      beep(880, 0.1);
+      cargar();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Marcar entregado';
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Marcar entregado';
+  }
+}
+
 async function cargar() {
   try {
     const [resPedidos, resInv] = await Promise.all([
@@ -227,15 +288,19 @@ function renderPedidos(pedidos) {
         </div>
         <div class="pedido-footer">
           <span>${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
-          <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
+          <span style="display:flex;gap:10px;align-items:center;">
+            <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
+            ${entregado ? '' : `<button class="btn-entregar" onclick="marcarEntregado('${p.id}', this)">Marcar entregado</button>`}
+          </span>
         </div>
       </div>`;
     }).join('');
   }
 
-  // Alerta sonora/visual cuando llega un pedido nuevo
+  // Alerta visual y sonora cuando llega un pedido nuevo
   pedidos.forEach((p) => {
     if (!pedidosVistos.has(p.id) && !primeraCarga) {
+      beep(660, 0.15);
       document.title = '● ¡Nuevo pedido! — YogApp Stand';
       setTimeout(() => { document.title = 'YogApp — Panel del Stand'; }, 4000);
     }
