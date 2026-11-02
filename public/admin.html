@@ -129,6 +129,12 @@
   .btn-entregar:active { transform: scale(.95); }
   .btn-entregar:disabled { opacity: .6; }
 
+  .resena { border-bottom: 1px dashed #dcecf2; padding: 10px 2px; }
+  .resena:last-child { border-bottom: none; }
+  .resena-estrellas { color: var(--acento); font-size: 16px; letter-spacing: 2px; }
+  .resena-comentario { font-size: 13px; margin-top: 2px; }
+  .resena-meta { font-size: 11.5px; color: var(--gris); margin-top: 2px; }
+
   /* ---------- Inventario ---------- */
   .inv-item { margin-bottom: 12px; }
   .inv-info { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 5px; }
@@ -192,6 +198,8 @@
         <div class="stat"><div class="numero" id="stat-pend">0</div><div class="etiqueta">Por entregar</div></div>
         <div class="stat"><div class="numero" id="stat-ingresos">$0</div><div class="etiqueta">Ingresos</div></div>
       </div>
+      <h2 style="margin-top:6px;">Ventas por producto</h2>
+      <div id="chart-productos"></div>
     </div>
 
     <div class="panel">
@@ -206,6 +214,11 @@
       <p class="nota-stand">Los jurados escanean este código y la app se abre en su celular.</p>
       <div id="qr-stand"></div>
       <p class="url-stand" id="url-stand"></p>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <h2>Calificaciones de clientes</h2>
+      <div id="lista-resenas"></div>
     </div>
 
     <div class="panel">
@@ -313,6 +326,35 @@ function renderPedidos(pedidos) {
   document.getElementById('stat-pend').textContent = pendientes.length;
   document.getElementById('stat-ingresos').textContent =
     '$' + pedidos.reduce((s, p) => s + p.total, 0).toLocaleString('es-CO');
+
+  renderChartProductos(pedidos);
+  renderResenas(pedidos);
+}
+
+function renderChartProductos(pedidos) {
+  const conteo = {};
+  pedidos.forEach((p) => { conteo[p.tipo] = (conteo[p.tipo] || 0) + 1; });
+  const entradas = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...entradas.map((e) => e[1]));
+  document.getElementById('chart-productos').innerHTML = entradas.length
+    ? entradas.map(([tipo, n]) => `
+      <div class="inv-item">
+        <div class="inv-info"><span>${tipo}</span><span class="inv-cant">${n}</span></div>
+        <div class="barra"><div class="barra-fill" style="width:${(n / max) * 100}%"></div></div>
+      </div>`).join('')
+    : '<div class="vacio">Sin ventas aún</div>';
+}
+
+function renderResenas(pedidos) {
+  const resenas = pedidos.filter((p) => p.calificacion);
+  document.getElementById('lista-resenas').innerHTML = resenas.length
+    ? resenas.map((p) => `
+      <div class="resena">
+        <div class="resena-estrellas">${'★'.repeat(p.calificacion.estrellas)}${'☆'.repeat(5 - p.calificacion.estrellas)}</div>
+        ${p.calificacion.comentario ? `<div class="resena-comentario">"${p.calificacion.comentario}"</div>` : ''}
+        <div class="resena-meta">#${p.id} · ${p.tipo}</div>
+      </div>`).join('')
+    : '<div class="vacio">Aún no hay calificaciones</div>';
 }
 
 function renderInventario(inventario) {

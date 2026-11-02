@@ -152,6 +152,24 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { pedido });
     }
 
+    // Calificación del cliente (solo pedidos entregados)
+    const matchCalificar = ruta.match(/^\/api\/pedidos\/([^/]+)\/calificar$/);
+    if (matchCalificar && req.method === 'POST') {
+      const id = decodeURIComponent(matchCalificar[1]);
+      const pedido = pedidos.find((p) => p.id === id);
+      if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
+      if (pedido.estado !== 'Entregado') return json(res, 400, { error: 'El pedido aún no ha sido entregado' });
+      const body = await leerBody(req);
+      const estrellas = Math.min(5, Math.max(1, parseInt(body.estrellas, 10) || 0));
+      if (!estrellas) return json(res, 400, { error: 'Número de estrellas inválido' });
+      pedido.calificacion = {
+        estrellas,
+        comentario: String(body.comentario || '').slice(0, 200),
+        fecha: Date.now(),
+      };
+      return json(res, 200, { pedido });
+    }
+
     if (ruta === '/api/inventario' && req.method === 'GET') {
       return json(res, 200, { inventario });
     }

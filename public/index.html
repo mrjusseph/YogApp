@@ -242,6 +242,54 @@
   .qr-mini img { border-radius: 8px; }
   .vacio-tickets { text-align: center; color: var(--gris); padding: 28px 12px; font-size: 14px; line-height: 1.6; }
 
+  .tarjeta-puntos {
+    background: linear-gradient(150deg, var(--acento), #d97c2b);
+    color: #fff;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(217, 124, 43, .3);
+  }
+  .tarjeta-puntos .puntos-num { font-size: 24px; font-weight: 800; }
+  .tarjeta-puntos .puntos-txt { font-size: 12.5px; opacity: .95; }
+  .tarjeta-puntos .puntos-icono { font-size: 30px; }
+
+  .estrellas { margin: 8px 0 2px; }
+  .estrella {
+    background: none;
+    border: none;
+    color: #d4e9f0;
+    cursor: pointer;
+    font-size: 30px;
+    padding: 0 3px;
+    transition: color .12s ease, transform .12s ease;
+  }
+  .estrella.activa { color: var(--acento); }
+  .estrella:active { transform: scale(1.25); }
+  .estrellas-leidas { color: var(--acento); font-size: 18px; letter-spacing: 2px; margin-top: 4px; }
+  .input-resena {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #d4e9f0;
+    border-radius: 11px;
+    font-size: 13.5px;
+    margin-top: 8px;
+  }
+  .btn-calificar {
+    margin-top: 8px;
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 11px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
   /* ---------- Navegación inferior ---------- */
   .nav-inferior {
     position: fixed;
@@ -409,6 +457,7 @@
   <section id="view-ticket" class="seccion">
     <h2 class="titulo-seccion">Mis tickets</h2>
     <p class="subtitulo">Todos tus pedidos con su código QR de retiro en el stand.</p>
+    <div id="tarjeta-puntos"></div>
     <div id="lista-tickets"></div>
     <button class="btn-secundario" onclick="nuevoPedido()">Hacer otro pedido</button>
   </section>
@@ -582,6 +631,7 @@ async function cargarMisTickets() {
   const cont = document.getElementById('lista-tickets');
   const ids = misIds();
   if (!ids.length) {
+    document.getElementById('tarjeta-puntos').innerHTML = '';
     cont.innerHTML = '<div class="vacio-tickets">Aún no tienes pedidos.<br>¡Arma tu primer vaso en la pestaña "Arma tu Vaso"!</div>';
     return;
   }
@@ -591,6 +641,12 @@ async function cargarMisTickets() {
     const res = await fetch('/api/pedidos?ids=' + ids.join(','));
     if (res.ok) pedidos = (await res.json()).pedidos;
   } catch { /* si no hay conexión, mostramos lo que tengamos */ }
+
+  // Puntos de fidelidad: 1 punto por vaso entregado, 10 puntos = vaso gratis
+  const puntos = pedidos.filter((p) => p.estado === 'Entregado').length;
+  document.getElementById('tarjeta-puntos').innerHTML = puntos >= 10
+    ? `<div><div class="puntos-num">${puntos} pts</div><div class="puntos-txt">¡Felicidades! Tienes un vaso GRATIS</div></div><span class="puntos-icono">★</span>`
+    : `<div><div class="puntos-num">${puntos} pts</div><div class="puntos-txt">Faltan ${10 - puntos} puntos para un vaso gratis</div></div><span class="puntos-icono">★</span>`;
 
   cont.innerHTML = ids.map((id) => {
     const p = pedidos.find((x) => x.id === id);
@@ -607,12 +663,52 @@ async function cargarMisTickets() {
         <span class="estado-txt" style="color:${entregado ? '#2c9e63' : '#b06f1f'};">${p.estado}</span>
       </div>
       <div class="mini-ticket-desc">${p.tipo} · ${p.base} · ${p.frutas.join(', ') || 'sin frutas'} · <strong>$${p.total.toLocaleString('es-CO')}</strong></div>
-      ${entregado
-        ? '<div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Entregado. ¡Buen provecho!</div>'
-        : `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
-           <div class="mensaje-qr">Muestra este QR en el stand para retirar tu vaso</div>`}
+      ${entregado ? htmlEntregado(p) : `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
+         <div class="mensaje-qr">Muestra este QR en el stand para retirar tu vaso</div>`}
     </div>`;
   }).join('');
+}
+
+function htmlEntregado(p) {
+  if (p.calificacion) {
+    return `<div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Entregado. ¡Buen provecho!</div>
+      <div class="estrellas-leidas">${'★'.repeat(p.calificacion.estrellas)}${'☆'.repeat(5 - p.calificacion.estrellas)}</div>
+      ${p.calificacion.comentario ? `<div class="mini-ticket-desc">"${p.calificacion.comentario}"</div>` : ''}`;
+  }
+  return `<div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Entregado. ¡Buen provecho!</div>
+    <div class="mensaje-qr" style="margin-top:10px;">¿Cómo estuvo tu vaso?</div>
+    <div class="estrellas" data-estrellas="0">
+      ${[1, 2, 3, 4, 5].map((n) => `<button class="estrella" onclick="pintarEstrellas(this, ${n})">★</button>`).join('')}
+    </div>
+    <input class="input-resena" placeholder="Comentario opcional…">
+    <button class="btn-calificar" onclick="calificar('${p.id}', this)">Enviar calificación</button>`;
+}
+
+function pintarEstrellas(btn, n) {
+  const cont = btn.parentElement;
+  cont.dataset.estrellas = n;
+  [...cont.querySelectorAll('.estrella')].forEach((e, i) => e.classList.toggle('activa', i < n));
+}
+
+async function calificar(id, btn) {
+  const cont = btn.parentElement.querySelector('.estrellas');
+  const estrellas = parseInt(cont.dataset.estrellas, 10);
+  if (!estrellas) { toast('Elige las estrellas primero'); return; }
+  const comentario = btn.parentElement.querySelector('.input-resena').value.trim();
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/pedidos/' + encodeURIComponent(id) + '/calificar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estrellas, comentario }),
+    });
+    if (!res.ok) throw new Error();
+    toast('¡Gracias por tu calificación!');
+    cargarMisTickets();
+  } catch {
+    btn.disabled = false;
+    toast('No se pudo enviar la calificación');
+  }
 }
 
 function nuevoPedido() {
