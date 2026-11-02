@@ -1,0 +1,12 @@
+{
+  "name": "yogapp",
+  "version": "1.0.0",
+  "description": "YogApp - demo FoodTech para stand universitario",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

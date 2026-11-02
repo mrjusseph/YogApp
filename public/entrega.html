@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YogApp — Entrega</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f2f9fb;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .tarjeta {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 8px 30px rgba(47,127,158,.15);
+    padding: 36px 28px;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+  }
+  .icono {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icono.ok { background: #e2f6eb; }
+  .icono.error { background: #fdeaea; }
+  .icono svg { width: 40px; height: 40px; }
+  h1 { font-size: 21px; color: #23404d; margin-bottom: 8px; }
+  p { font-size: 14px; color: #7d97a3; line-height: 1.5; }
+  .orden { font-weight: 800; color: #2f7f9e; font-size: 17px; display: block; margin-top: 6px; }
+  .spinner {
+    width: 46px; height: 46px;
+    border: 5px solid #e8f6fa;
+    border-top-color: #4aa8c4;
+    border-radius: 50%;
+    margin: 0 auto 18px;
+    animation: girar .8s linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="tarjeta" id="contenido">
+  <div class="spinner"></div>
+  <h1>Procesando entrega…</h1>
+  <p>Un momento, estamos confirmando el pedido.</p>
+</div>
+
+<script>
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const cont = document.getElementById('contenido');
+
+  if (!id) {
+    cont.innerHTML = iconoError() + '<h1>Código inválido</h1><p>Este QR no contiene un número de pedido.</p>';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/pedidos/' + encodeURIComponent(id) + '/entregar', { method: 'POST' });
+    const data = await res.json();
+
+    if (res.status === 404) {
+      cont.innerHTML = iconoError() + `<h1>Pedido no encontrado</h1><p>La orden <span class="orden">#${id}</span> no existe en el sistema.</p>`;
+    } else if (data.yaEntregado) {
+      cont.innerHTML = iconoOk('#2f7f9e') + `<h1>Ya fue entregado</h1><p>La orden <span class="orden">#${id}</span> ya había sido entregada anteriormente.</p>`;
+    } else {
+      cont.innerHTML = iconoOk('#2c9e63') + `<h1>¡Entrega confirmada!</h1><p>La orden <span class="orden">#${id}</span> se marcó como <strong>Entregado</strong>. El cliente ya puede disfrutar su vaso.</p>`;
+    }
+  } catch {
+    cont.innerHTML = iconoError() + '<h1>Sin conexión</h1><p>No se pudo contactar al servidor. Verifica que estés en la red del stand.</p>';
+  }
+
+  function iconoOk(color) {
+    return `<div class="icono ok"><svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>`;
+  }
+  function iconoError() {
+    return `<div class="icono error"><svg viewBox="0 0 24 24" fill="none" stroke="#c94f4f" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>`;
+  }
+})();
+</script>
+</body>
+</html>

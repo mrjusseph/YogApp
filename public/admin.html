@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#23404d">
+<title>YogApp — Panel del Stand</title>
+<style>
+  :root {
+    --azul: #4aa8c4;
+    --azul-oscuro: #2f7f9e;
+    --azul-claro: #e8f6fa;
+    --acento: #f0a35c;
+    --texto: #23404d;
+    --gris: #7d97a3;
+    --sombra: 0 4px 16px rgba(47,127,158,.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f2f9fb;
+    color: var(--texto);
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(150deg, var(--azul), var(--azul-oscuro));
+    color: #fff;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 20px; letter-spacing: 1px; }
+  header .live {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.15);
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+  }
+  .punto {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #54e08a;
+    animation: pulso 1.4s infinite;
+  }
+  @keyframes pulso { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px 18px 40px;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 820px) { main { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: var(--sombra);
+    padding: 18px;
+  }
+  .panel h2 {
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--azul-oscuro);
+    margin-bottom: 14px;
+  }
+
+  /* ---------- Pedidos ---------- */
+  .pedido {
+    border: 2px solid var(--azul-claro);
+    border-left-width: 6px;
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 12px;
+    transition: opacity .3s;
+  }
+  .pedido.estado-preparacion { border-left-color: var(--acento); }
+  .pedido.estado-entregado { border-left-color: #54b884; opacity: .55; }
+  .pedido-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .pedido-id { font-weight: 800; font-size: 15px; }
+  .estado {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .estado-preparacion .estado { background: #fdf0df; color: #b06f1f; }
+  .estado-entregado .estado { background: #e2f6eb; color: #2c7a52; }
+  .pedido-detalle { font-size: 13.5px; color: var(--gris); line-height: 1.5; }
+  .pedido-detalle strong { color: var(--texto); }
+  .pedido-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; padding-top: 8px; border-top: 1px dashed #dcecf2;
+    font-size: 13px;
+  }
+  .pedido-total { font-weight: 800; color: var(--azul-oscuro); font-size: 15px; }
+  .vacio { text-align: center; color: var(--gris); padding: 30px 10px; font-size: 14px; }
+
+  /* ---------- Inventario ---------- */
+  .inv-item { margin-bottom: 12px; }
+  .inv-info { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 5px; }
+  .inv-cant { font-weight: 700; color: var(--azul-oscuro); }
+  .barra {
+    height: 8px;
+    background: var(--azul-claro);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .barra-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--azul), var(--azul-oscuro));
+    border-radius: 99px;
+    transition: width .5s ease, background .3s;
+  }
+  .barra-fill.bajo { background: linear-gradient(90deg, #f0a35c, #d97c2b); }
+
+  /* ---------- QR de conexión ---------- */
+  #qr-stand { display: flex; justify-content: center; padding: 8px 0 4px; }
+  #qr-stand img, #qr-stand canvas { border-radius: 10px; }
+  .url-stand {
+    text-align: center;
+    font-size: 13px;
+    color: var(--gris);
+    word-break: break-all;
+    margin-top: 8px;
+  }
+  .nota-stand {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--gris);
+    margin-top: 6px;
+  }
+
+  /* ---------- Resumen ---------- */
+  .stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  .stat {
+    flex: 1;
+    background: var(--azul-claro);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat .numero { font-size: 24px; font-weight: 800; color: var(--azul-oscuro); }
+  .stat .etiqueta { font-size: 11.5px; color: var(--gris); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>YOGAPP · Panel del Stand</h1>
+  <span class="live"><span class="punto"></span> Recibiendo pedidos en vivo</span>
+</header>
+
+<main>
+  <div>
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="stats">
+        <div class="stat"><div class="numero" id="stat-total">0</div><div class="etiqueta">Pedidos hoy</div></div>
+        <div class="stat"><div class="numero" id="stat-pend">0</div><div class="etiqueta">Por entregar</div></div>
+        <div class="stat"><div class="numero" id="stat-ingresos">$0</div><div class="etiqueta">Ingresos</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Pedidos entrantes</h2>
+      <div id="lista-pedidos"><div class="vacio">Esperando el primer pedido…</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:20px;">
+      <h2>QR para el stand</h2>
+      <p class="nota-stand">Los jurados escanean este código y la app se abre en su celular.</p>
+      <div id="qr-stand"></div>
+      <p class="url-stand" id="url-stand"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Inventario en vivo</h2>
+      <div id="lista-inventario"></div>
+    </div>
+  </div>
+</main>
+
+<script src="/vendor/qrcode.min.js"></script>
+<script>
+let pedidosVistos = new Set();
+let primeraCarga = true;
+
+async function cargar() {
+  try {
+    const [resPedidos, resInv] = await Promise.all([
+      fetch('/api/pedidos'),
+      fetch('/api/inventario'),
+    ]);
+    const { pedidos } = await resPedidos.json();
+    const { inventario } = await resInv.json();
+    renderPedidos(pedidos);
+    renderInventario(inventario);
+  } catch { /* el servidor no responde, reintentar en el próximo ciclo */ }
+}
+
+function renderPedidos(pedidos) {
+  const lista = document.getElementById('lista-pedidos');
+  if (!pedidos.length) {
+    lista.innerHTML = '<div class="vacio">Esperando el primer pedido…</div>';
+  } else {
+    lista.innerHTML = pedidos.map((p) => {
+      const entregado = p.estado === 'Entregado';
+      return `
+      <div class="pedido estado-${entregado ? 'entregado' : 'preparacion'}">
+        <div class="pedido-top">
+          <span class="pedido-id">#${p.id}</span>
+          <span class="estado">${p.estado}</span>
+        </div>
+        <div class="pedido-detalle">
+          <strong>${p.tipo}</strong> · ${p.base}<br>
+          Frutas: ${p.frutas.join(', ') || 'ninguna'} · Cereales: ${p.cereales.join(', ') || 'ninguno'}<br>
+          Retiro: ${p.horaRetiro} · Pago: ${p.pago}
+        </div>
+        <div class="pedido-footer">
+          <span>${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+          <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Alerta sonora/visual cuando llega un pedido nuevo
+  pedidos.forEach((p) => {
+    if (!pedidosVistos.has(p.id) && !primeraCarga) {
+      document.title = '● ¡Nuevo pedido! — YogApp Stand';
+      setTimeout(() => { document.title = 'YogApp — Panel del Stand'; }, 4000);
+    }
+    pedidosVistos.add(p.id);
+  });
+  primeraCarga = false;
+
+  const pendientes = pedidos.filter((p) => p.estado !== 'Entregado');
+  document.getElementById('stat-total').textContent = pedidos.length;
+  document.getElementById('stat-pend').textContent = pendientes.length;
+  document.getElementById('stat-ingresos').textContent =
+    '$' + pedidos.reduce((s, p) => s + p.total, 0).toLocaleString('es-CO');
+}
+
+function renderInventario(inventario) {
+  const max = 30;
+  document.getElementById('lista-inventario').innerHTML = Object.entries(inventario).map(([item, cant]) => {
+    const pct = Math.max(0, Math.min(100, (cant / max) * 100));
+    return `
+    <div class="inv-item">
+      <div class="inv-info"><span>${item}</span><span class="inv-cant">${cant}</span></div>
+      <div class="barra"><div class="barra-fill ${cant <= 8 ? 'bajo' : ''}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+async function generarQrStand() {
+  try {
+    const res = await fetch('/api/info');
+    const { ip, port } = await res.json();
+    const url = `http://${ip}:${port}`;
+    document.getElementById('url-stand').textContent = url;
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    document.getElementById('qr-stand').innerHTML = qr.createImgTag(4, 0);
+  } catch { /* reintentar */ }
+}
+
+cargar();
+generarQrStand();
+setInterval(cargar, 2000);
+</script>
+</body>
+</html>
