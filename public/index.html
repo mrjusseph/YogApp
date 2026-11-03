@@ -627,7 +627,17 @@ async function confirmarPedido() {
   cambiarVista('view-ticket');
 }
 
-async function cargarMisTickets() {
+let firmaTickets = '';
+
+// true si el cliente está eligiendo estrellas o escribiendo un comentario:
+// en ese caso el refresco automático no debe tocar el HTML.
+function ticketEnEdicion() {
+  const lista = document.getElementById('lista-tickets');
+  if (lista.contains(document.activeElement)) return true;
+  return !!lista.querySelector('.estrellas[data-estrellas]:not([data-estrellas="0"])');
+}
+
+async function cargarMisTickets(forzar = false) {
   const cont = document.getElementById('lista-tickets');
   const ids = misIds();
   if (!ids.length) {
@@ -637,10 +647,19 @@ async function cargarMisTickets() {
   }
 
   let pedidos = [];
+  let errorRed = false;
   try {
     const res = await fetch('/api/pedidos?ids=' + ids.join(','));
     if (res.ok) pedidos = (await res.json()).pedidos;
-  } catch { /* si no hay conexión, mostramos lo que tengamos */ }
+    else errorRed = true;
+  } catch { errorRed = true; }
+
+  // Sin conexión: conservar lo último que se mostró en vez de borrarlo
+  if (errorRed && cont.innerHTML.trim()) return;
+
+  const firma = JSON.stringify(pedidos.map((p) => [p.id, p.estado, p.calificacion ? [p.calificacion.estrellas, p.calificacion.comentario] : 0]));
+  if (!forzar && (firma === firmaTickets || ticketEnEdicion())) return;
+  firmaTickets = firma;
 
   // Puntos de fidelidad: 1 punto por vaso entregado, 10 puntos = vaso gratis
   const puntos = pedidos.filter((p) => p.estado === 'Entregado').length;
@@ -704,7 +723,8 @@ async function calificar(id, btn) {
     });
     if (!res.ok) throw new Error();
     toast('¡Gracias por tu calificación!');
-    cargarMisTickets();
+    if (document.activeElement) document.activeElement.blur();
+    cargarMisTickets(true);
   } catch {
     btn.disabled = false;
     toast('No se pudo enviar la calificación');
