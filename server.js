@@ -130,12 +130,27 @@ const server = http.createServer(async (req, res) => {
         estado: 'En preparación',
         creado: Date.now(),
       };
+      // Plan semanal: lista de los 3 cupos elegidos
+      if (Array.isArray(body.detallePlan) && body.detallePlan.length) {
+        pedido.detallePlan = body.detallePlan.slice(0, 3).map((c) => ({
+          dia: String(c.dia || '').slice(0, 20),
+          tipo: String(c.tipo || '').slice(0, 30),
+          fruta: String(c.fruta || '').slice(0, 30),
+        }));
+      }
       pedidos.unshift(pedido);
 
       // Descontar inventario
-      if (inventario[pedido.base] !== undefined) inventario[pedido.base]--;
-      pedido.frutas.forEach((f) => { if (inventario[f] !== undefined) inventario[f]--; });
-      pedido.cereales.forEach((c) => { if (inventario[c] !== undefined) inventario[c]--; });
+      if (pedido.detallePlan) {
+        pedido.detallePlan.forEach((c) => {
+          if (inventario[pedido.base] !== undefined) inventario[pedido.base]--;
+          if (inventario[c.fruta] !== undefined) inventario[c.fruta]--;
+        });
+      } else {
+        if (inventario[pedido.base] !== undefined) inventario[pedido.base]--;
+        pedido.frutas.forEach((f) => { if (inventario[f] !== undefined) inventario[f]--; });
+        pedido.cereales.forEach((c) => { if (inventario[c] !== undefined) inventario[c]--; });
+      }
 
       return json(res, 201, { pedido });
     }
@@ -146,9 +161,25 @@ const server = http.createServer(async (req, res) => {
       const id = decodeURIComponent(matchEntregar[1]);
       const pedido = pedidos.find((p) => p.id === id);
       if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
+      if (pedido.estado === 'Cancelado') return json(res, 400, { error: 'El pedido está cancelado', cancelado: true });
       if (pedido.estado === 'Entregado') return json(res, 200, { pedido, yaEntregado: true });
       pedido.estado = 'Entregado';
       pedido.entregado = Date.now();
+      return json(res, 200, { pedido });
+    }
+
+    // Cancelación del cliente: solo mientras está en preparación
+    const matchCancelar = ruta.match(/^\/api\/pedidos\/([^/]+)\/cancelar$/);
+    if (matchCancelar && req.method === 'POST') {
+      const id = decodeURIComponent(matchCancelar[1]);
+      const pedido = pedidos.find((p) => p.id === id);
+      if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
+      if (pedido.estado === 'Cancelado') return json(res, 200, { pedido, yaCancelado: true });
+      if (pedido.estado === 'Entregado') return json(res, 400, { error: 'El pedido ya fue entregado y no se puede cancelar' });
+      const body = await leerBody(req);
+      pedido.estado = 'Cancelado';
+      pedido.cancelado = Date.now();
+      pedido.motivo = String(body.motivo || 'Sin motivo').slice(0, 80);
       return json(res, 200, { pedido });
     }
 
@@ -162,9 +193,13 @@ const server = http.createServer(async (req, res) => {
       const body = await leerBody(req);
       const estrellas = Math.min(5, Math.max(1, parseInt(body.estrellas, 10) || 0));
       if (!estrellas) return json(res, 400, { error: 'Número de estrellas inválido' });
+      const comentarios = (Array.isArray(body.comentarios) ? body.comentarios : [])
+        .map((c) => String(c).slice(0, 40))
+        .filter(Boolean)
+        .slice(0, 6);
       pedido.calificacion = {
         estrellas,
-        comentario: String(body.comentario || '').slice(0, 200),
+        comentarios,
         fecha: Date.now(),
       };
       return json(res, 200, { pedido });
