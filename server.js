@@ -2,7 +2,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -17,6 +16,19 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
 };
+
+// Topping adicional en Estandar y Especial: $500
+const TOPPING_EXTRA = 500;
+const INCLUIDOS = {
+  'Vaso Estandar': { frutas: 1, cereales: 1 },
+  'Vaso Especial': { frutas: 2, cereales: 2 },
+  'Vaso Personalizado': { frutas: 0, cereales: 0 },
+};
+const PLANES = {
+  clasico: { nombre: 'Plan Clásico', precio: 11000, tipo: 'Vaso Estandar' },
+  premium: { nombre: 'Plan Premium', precio: 17000, tipo: 'Vaso Especial' },
+};
+const DIAS_PLAN = ['Lunes', 'Miércoles', 'Viernes'];
 
 // ---------- Estado en memoria ----------
 let pedidos = [];
@@ -70,6 +82,42 @@ function servirArchivo(res, ruta) {
   });
 }
 
+function lista(valor, max = 3) {
+  return (Array.isArray(valor) ? valor : [])
+    .map((s) => String(s).slice(0, 30))
+    .filter(Boolean)
+    .slice(0, max);
+}
+
+function extrasDeCupo(cupo) {
+  const inc = INCLUIDOS[cupo.tipo] || INCLUIDOS['Vaso Estandar'];
+  return Math.max(0, cupo.frutas.length - inc.frutas) +
+    Math.max(0, cupo.cereales.length - inc.cereales);
+}
+
+function recalcularTotalPlan(pedido) {
+  const extras = pedido.detallePlan.reduce((s, c) => s + extrasDeCupo(c), 0);
+  pedido.total = pedido.totalBase + extras * TOPPING_EXTRA;
+}
+
+function descontarInventario(item) {
+  if (inventario[item] !== undefined) inventario[item] = Math.max(0, inventario[item] - 1);
+}
+
+function entregarSiguienteCupo(pedido) {
+  const indice = pedido.detallePlan.findIndex((c) => !c.entregado);
+  if (indice < 0) return null;
+  const cupo = pedido.detallePlan[indice];
+  cupo.entregado = true;
+  cupo.entregadoEn = Date.now();
+  const planCompleto = pedido.detallePlan.every((c) => c.entregado);
+  if (planCompleto) {
+    pedido.estado = 'Entregado';
+    pedido.entregado = Date.now();
+  }
+  return { cupo, indice, planCompleto };
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const ruta = url.pathname;
@@ -96,17 +144,14 @@ const server = http.createServer(async (req, res) => {
     if (ruta === '/api/pedidos' && req.method === 'GET') {
       const ids = url.searchParams.get('ids');
       if (ids) {
-        const lista = ids.split(',').map((s) => s.trim()).filter(Boolean);
-        return json(res, 200, { pedidos: pedidos.filter((p) => lista.includes(p.id)) });
+        const listaIds = ids.split(',').map((s) => s.trim()).filter(Boolean);
+        return json(res, 200, { pedidos: pedidos.filter((p) => listaIds.includes(p.id)) });
       }
       return json(res, 200, { pedidos });
     }
 
     if (ruta === '/api/pedidos' && req.method === 'POST') {
       const body = await leerBody(req);
-      if (!body.tipo || !body.base || !body.total) {
-        return json(res, 400, { error: 'Faltan datos del pedido' });
-      }
       // El cliente propone su id: si ya existe, devolvemos el pedido (reintento sin duplicar)
       let id;
       if (typeof body.id === 'string' && /^YOG-[A-Za-z0-9-]{2,20}$/.test(body.id)) {
@@ -118,57 +163,142 @@ const server = http.createServer(async (req, res) => {
       } else {
         id = 'YOG-' + contador++;
       }
+
+      const plan = PLANES[body.planClave];
+      if (plan) {
+        const cupos = (Array.isArray(body.detallePlan) ? body.detallePlan : []).slice(0, 3).map((c, i) => ({
+          dia: DIAS_PLAN[i],
+          tipo: plan.tipo,
+          frutas: lista(c.frutas),
+          cereales: lista(c.cereales),
+          entregado: false,
+        }));
+        if (cupos.length !== 3) return json(res, 400, { error: 'El plan necesita los 3 vasos' });
+        const pedido = {
+          id,
+          tipo: plan.nombre,
+          planClave: body.planClave,
+          base: 'Yogurt griego',
+          frutas: [],
+          cereales: [],
+          pago: String(body.pago || '').slice(0, 30),
+          totalBase: plan.precio,
+          total: 0,
+          estado: 'En preparación',
+          creado: Date.now(),
+          detallePlan: cupos,
+        };
+        recalcularTotalPlan(pedido);
+        pedidos.unshift(pedido);
+
+        cupos.forEach((c) => {
+          descontarInventario('Yogurt griego');
+          c.frutas.forEach(descontarInventario);
+          c.cereales.forEach(descontarInventario);
+        });
+
+        return json(res, 201, { pedido });
+      }
+
+      if (!body.tipo || !body.base || !body.total) {
+        return json(res, 400, { error: 'Faltan datos del pedido' });
+      }
       const pedido = {
         id,
-        tipo: body.tipo,
-        base: body.base,
-        frutas: body.frutas || [],
-        cereales: body.cereales || [],
-        horaRetiro: body.horaRetiro || '',
-        pago: body.pago || '',
+        tipo: String(body.tipo).slice(0, 40),
+        base: String(body.base).slice(0, 40),
+        frutas: lista(body.frutas),
+        cereales: lista(body.cereales),
+        pago: String(body.pago || '').slice(0, 30),
         total: body.total,
         estado: 'En preparación',
         creado: Date.now(),
       };
-      // Plan semanal: lista de los 3 cupos elegidos
-      if (Array.isArray(body.detallePlan) && body.detallePlan.length) {
-        pedido.detallePlan = body.detallePlan.slice(0, 3).map((c) => ({
-          dia: String(c.dia || '').slice(0, 20),
-          tipo: String(c.tipo || '').slice(0, 30),
-          fruta: String(c.fruta || '').slice(0, 30),
-        }));
-      }
       pedidos.unshift(pedido);
 
-      // Descontar inventario
-      if (pedido.detallePlan) {
-        pedido.detallePlan.forEach((c) => {
-          if (inventario[pedido.base] !== undefined) inventario[pedido.base]--;
-          if (inventario[c.fruta] !== undefined) inventario[c.fruta]--;
-        });
-      } else {
-        if (inventario[pedido.base] !== undefined) inventario[pedido.base]--;
-        pedido.frutas.forEach((f) => { if (inventario[f] !== undefined) inventario[f]--; });
-        pedido.cereales.forEach((c) => { if (inventario[c] !== undefined) inventario[c]--; });
-      }
+      descontarInventario(pedido.base);
+      pedido.frutas.forEach(descontarInventario);
+      pedido.cereales.forEach(descontarInventario);
 
       return json(res, 201, { pedido });
     }
 
-    // Escaneo del QR del ticket: marca entregado
+    // Escaneo del QR del ticket: marca entregado (en planes, reclama el próximo vaso)
     const matchEntregar = ruta.match(/^\/api\/pedidos\/([^/]+)\/entregar$/);
     if (matchEntregar && req.method === 'POST') {
       const id = decodeURIComponent(matchEntregar[1]);
       const pedido = pedidos.find((p) => p.id === id);
       if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
       if (pedido.estado === 'Cancelado') return json(res, 400, { error: 'El pedido está cancelado', cancelado: true });
-      if (pedido.estado === 'Entregado') return json(res, 200, { pedido, yaEntregado: true });
-      pedido.estado = 'Entregado';
-      pedido.entregado = Date.now();
-      return json(res, 200, { pedido });
+      if (!pedido.detallePlan) {
+        if (pedido.estado === 'Entregado') return json(res, 200, { pedido, yaEntregado: true });
+        pedido.estado = 'Entregado';
+        pedido.entregado = Date.now();
+        return json(res, 200, { pedido });
+      }
+      const cupo = entregarSiguienteCupo(pedido);
+      if (!cupo) return json(res, 200, { pedido, yaEntregado: true, planCompleto: true });
+      return json(res, 200, { pedido, cupo: cupo.cupo, indice: cupo.indice, planCompleto: cupo.planCompleto });
     }
 
-    // Cancelación del cliente: solo mientras está en preparación
+    // Entrega de un vaso concreto del plan (panel del stand)
+    const matchCupoEntregar = ruta.match(/^\/api\/pedidos\/([^/]+)\/plan\/(\d+)\/entregar$/);
+    if (matchCupoEntregar && req.method === 'POST') {
+      const id = decodeURIComponent(matchCupoEntregar[1]);
+      const pedido = pedidos.find((p) => p.id === id);
+      if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
+      if (!pedido.detallePlan) return json(res, 400, { error: 'Este pedido no es un plan' });
+      if (pedido.estado === 'Cancelado') return json(res, 400, { error: 'El plan está cancelado', cancelado: true });
+      const indice = Number(matchCupoEntregar[2]);
+      const cupo = pedido.detallePlan[indice];
+      if (!cupo) return json(res, 404, { error: 'Vaso no encontrado' });
+      if (cupo.entregado) return json(res, 200, { pedido, cupo, indice, yaEntregado: true, planCompleto: pedido.estado === 'Entregado' });
+      cupo.entregado = true;
+      cupo.entregadoEn = Date.now();
+      const planCompleto = pedido.detallePlan.every((c) => c.entregado);
+      if (planCompleto) {
+        pedido.estado = 'Entregado';
+        pedido.entregado = Date.now();
+      }
+      return json(res, 200, { pedido, cupo, indice, planCompleto });
+    }
+
+    // Edición de un vaso del plan que todavía no se ha reclamado
+    const matchCupoEditar = ruta.match(/^\/api\/pedidos\/([^/]+)\/plan\/(\d+)\/editar$/);
+    if (matchCupoEditar && req.method === 'POST') {
+      const id = decodeURIComponent(matchCupoEditar[1]);
+      const pedido = pedidos.find((p) => p.id === id);
+      if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
+      if (!pedido.detallePlan) return json(res, 400, { error: 'Este pedido no es un plan' });
+      if (pedido.estado === 'Cancelado') return json(res, 400, { error: 'El plan está cancelado' });
+      const indice = Number(matchCupoEditar[2]);
+      const cupo = pedido.detallePlan[indice];
+      if (!cupo) return json(res, 404, { error: 'Vaso no encontrado' });
+      if (cupo.entregado) return json(res, 400, { error: 'Ese vaso ya fue reclamado en el stand' });
+
+      const body = await leerBody(req);
+      const frutas = lista(body.frutas);
+      const cereales = lista(body.cereales);
+      if (!frutas.length) return json(res, 400, { error: 'Elige al menos una fruta' });
+
+      const contar = (arr) => arr.reduce((m, x) => {
+        m[x] = (m[x] || 0) + 1;
+        return m;
+      }, {});
+      const antes = contar([...cupo.frutas, ...cupo.cereales]);
+      const despues = contar([...frutas, ...cereales]);
+      new Set([...Object.keys(antes), ...Object.keys(despues)]).forEach((item) => {
+        const diff = (despues[item] || 0) - (antes[item] || 0);
+        if (inventario[item] !== undefined) inventario[item] = Math.max(0, inventario[item] - diff);
+      });
+
+      cupo.frutas = frutas;
+      cupo.cereales = cereales;
+      recalcularTotalPlan(pedido);
+      return json(res, 200, { pedido, cupo, indice, total: pedido.total });
+    }
+
+    // Cancelación del cliente: pedidos normales en preparación, planes sin vasos reclamados
     const matchCancelar = ruta.match(/^\/api\/pedidos\/([^/]+)\/cancelar$/);
     if (matchCancelar && req.method === 'POST') {
       const id = decodeURIComponent(matchCancelar[1]);
@@ -176,6 +306,9 @@ const server = http.createServer(async (req, res) => {
       if (!pedido) return json(res, 404, { error: 'Pedido no encontrado' });
       if (pedido.estado === 'Cancelado') return json(res, 200, { pedido, yaCancelado: true });
       if (pedido.estado === 'Entregado') return json(res, 400, { error: 'El pedido ya fue entregado y no se puede cancelar' });
+      if (pedido.detallePlan && pedido.detallePlan.some((c) => c.entregado)) {
+        return json(res, 400, { error: 'Ya reclamaste un vaso del plan, no se puede cancelar' });
+      }
       const body = await leerBody(req);
       pedido.estado = 'Cancelado';
       pedido.cancelado = Date.now();
@@ -183,7 +316,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { pedido });
     }
 
-    // Calificación del cliente (solo pedidos entregados)
+    // Calificación del cliente (solo pedidos entregados; los planes al completar los 3 vasos)
     const matchCalificar = ruta.match(/^\/api\/pedidos\/([^/]+)\/calificar$/);
     if (matchCalificar && req.method === 'POST') {
       const id = decodeURIComponent(matchCalificar[1]);
