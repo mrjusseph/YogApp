@@ -801,6 +801,10 @@ let planActual = 'clasico';
 let seleccionPlan = [];
 let ultimosPedidos = [];
 
+// Limpieza del contador viejo: podía quedar por encima de los pedidos reales y bloquear los sellos
+localStorage.removeItem('yogapp_sellos_base');
+localStorage.removeItem('yogapp_recompensas');
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1090,13 +1094,23 @@ function ticketEnEdicion() {
   return !!lista.querySelector('.chip-resena.seleccionada');
 }
 
-// Sellos gastados en recompensas anteriores; al usar el topping el ciclo vuelve a 0
-function sellosBase() {
-  return parseInt(localStorage.getItem('yogapp_sellos_base') || '0', 10) || 0;
+// Sellos: se guardan los ids de los pedidos ya usados en un canje, no un contador.
+// Así, si el servidor se reinicia y desaparecen pedidos, los nuevos ratings vuelven a contar.
+function idsSellosUsados() {
+  try { return JSON.parse(localStorage.getItem('yogapp_sellos_usados') || '[]'); }
+  catch { return []; }
+}
+
+function sellosDisponibles(pedidos) {
+  const usados = new Set(idsSellosUsados());
+  return pedidos.filter((p) => p.calificacion && !usados.has(p.id));
 }
 
 function usarRecompensa() {
-  localStorage.setItem('yogapp_sellos_base', String(sellosBase() + 5));
+  const disponibles = sellosDisponibles(ultimosPedidos).map((p) => p.id);
+  if (disponibles.length < 5) return;
+  const consumir = disponibles.slice(-5);
+  localStorage.setItem('yogapp_sellos_usados', JSON.stringify([...idsSellosUsados(), ...consumir]));
   toast('¡Disfruta tu topping gratis!');
   cargarMisTickets(true);
 }
@@ -1301,8 +1315,7 @@ async function guardarEdicionPlan() {
 
 function renderPuntos(pedidos) {
   const meta = 5;
-  const calificados = pedidos.filter((p) => p.calificacion).length;
-  const puntos = Math.max(0, calificados - sellosBase());
+  const puntos = sellosDisponibles(pedidos).length;
   const llenos = Math.min(puntos, meta);
   const completa = puntos >= meta;
   const sellos = Array.from({ length: meta }, (_, i) =>
