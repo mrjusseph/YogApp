@@ -366,40 +366,113 @@
     cursor: pointer;
   }
 
-  /* ---------- Plan semanal ---------- */
-  .cinta {
+  /* ---------- Planes en inicio ---------- */
+  .planes-home { margin: 20px 0 8px; }
+  .planes-home h3 { font-size: 15.5px; }
+  .planes-home > p { font-size: 12px; color: var(--gris); margin: 2px 0 12px; line-height: 1.45; }
+  .planes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card-plan {
+    position: relative;
+    border: 2px solid #d9edf3;
+    border-radius: 16px;
+    padding: 17px 12px 11px;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: var(--sombra);
+    transition: transform .12s ease;
+  }
+  .card-plan:active { transform: scale(.97); }
+  .card-plan.premium { border-color: #f0d29b; background: linear-gradient(165deg, #fffbf1, #fff); }
+  .card-plan h4 { font-size: 14.5px; margin-bottom: 1px; }
+  .plan-sub { font-size: 11px; color: var(--gris); margin-bottom: 9px; }
+  .plan-precio { display: flex; align-items: baseline; gap: 6px; }
+  .plan-precio s { font-size: 11.5px; color: #a9bcc5; }
+  .plan-precio strong { font-size: 20px; color: var(--azul-oscuro); }
+  .card-plan.premium .plan-precio strong { color: #b06f1f; }
+  .plan-mini { font-size: 10.5px; color: #2c9e63; font-weight: 700; margin-top: 5px; line-height: 1.4; }
+  .badge-plan {
     position: absolute;
     top: -9px;
-    right: 14px;
-    background: var(--acento);
+    left: 10px;
+    background: var(--azul);
     color: #fff;
-    font-size: 10px;
+    font-size: 8.5px;
     font-weight: 800;
-    letter-spacing: .6px;
-    padding: 4px 11px;
+    letter-spacing: .5px;
+    padding: 3px 8px;
     border-radius: 999px;
-    box-shadow: 0 3px 8px rgba(217,124,43,.4);
+    box-shadow: 0 3px 8px rgba(47,127,158,.3);
   }
+  .badge-plan.oro { background: var(--acento); box-shadow: 0 3px 8px rgba(217,124,43,.35); }
+
+  /* ---------- Armar plan ---------- */
   .cupo { background: var(--azul-claro); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
   .cupo h4 {
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: .8px;
     color: var(--azul-oscuro);
-    margin-bottom: 8px;
+    margin-bottom: 2px;
   }
-  .cupo-fila { display: flex; gap: 8px; margin-bottom: 8px; }
-  .cupo-fila .chip { flex: 1; text-align: center; }
-  .cupo select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #d4e9f0;
-    border-radius: 12px;
-    font-size: 13.5px;
-    background: #fff;
-    color: var(--texto);
-    appearance: none;
+  .cupo .cupo-tipo { font-size: 11.5px; color: var(--gris); margin-bottom: 4px; }
+  .cupo-grupo { margin-top: 11px; }
+  .cupo-label {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--gris);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 6px;
   }
+  .opciones.chips-chicos .chip { padding: 7px 11px; font-size: 12px; border-width: 1.5px; }
+  .cupo-total { margin-top: 10px; font-size: 11.5px; font-weight: 700; color: var(--azul-oscuro); text-align: right; }
+
+  /* ---------- Plan en Mis Tickets ---------- */
+  .plan-card { border-style: solid; border-color: #f0c98a; background: #fffdf7; }
+  .plan-titulo-tickets {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #b06f1f;
+    font-weight: 800;
+    margin: 2px 0 8px;
+  }
+  .plan-cupos { margin: 10px 0 4px; text-align: left; }
+  .plan-cupo {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-top: 1px dashed #f0e0c0;
+    font-size: 12.5px;
+  }
+  .plan-cupo:first-child { border-top: none; }
+  .plan-cupo .check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid #d8c9a8;
+    color: #c8b48c;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .plan-cupo.hecho .check { background: #2c9e63; border-color: #2c9e63; color: #fff; }
+  .plan-cupo .cupo-info { flex: 1; line-height: 1.4; }
+  .plan-cupo.hecho .cupo-info { opacity: .6; }
+  .plan-cupo .btn-editar {
+    background: none;
+    border: 1.5px solid var(--azul);
+    color: var(--azul-oscuro);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .progreso-plan { height: 8px; background: #f4e6cb; border-radius: 99px; overflow: hidden; margin-top: 9px; }
+  .progreso-plan > div { height: 100%; background: linear-gradient(90deg, var(--acento), #d97c2b); border-radius: 99px; transition: width .4s; }
   .desde { font-size: 10px; display: block; font-weight: 600; color: var(--gris); }
 
   /* ---------- Modal de cancelación ---------- */
@@ -512,19 +585,29 @@
       <span class="precio"><span class="desde">desde</span>$7.000</span>
     </div>
 
-    <div class="card-producto" style="position:relative;cursor:pointer;" onclick="irPlan()">
-      <span class="cinta">MÁS POPULAR</span>
-      <div class="icono-vaso" style="background:linear-gradient(150deg,#9fd8b9,#4f9e74);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+    <div class="planes-home">
+      <h3>Planes semanales</h3>
+      <p>3 vasos a la semana con precio fijo. Ahorras y aseguras tus cupos.</p>
+      <div class="planes-grid">
+        <div class="card-plan" onclick="irPlan('clasico')">
+          <span class="badge-plan">MÁS POPULAR</span>
+          <h4>Plan Clásico</h4>
+          <p class="plan-sub">3 vasos Estandar</p>
+          <div class="plan-precio"><s>$13.500</s><strong>$11.000</strong></div>
+          <p class="plan-mini">Ahorras $2.500<br>$3.667 por vaso</p>
+        </div>
+        <div class="card-plan premium" onclick="irPlan('premium')">
+          <span class="badge-plan oro">MAYOR AHORRO</span>
+          <h4>Plan Premium</h4>
+          <p class="plan-sub">3 vasos Especial</p>
+          <div class="plan-precio"><s>$21.000</s><strong>$17.000</strong></div>
+          <p class="plan-mini">Ahorras $4.000<br>$5.667 por vaso</p>
+        </div>
       </div>
-      <div class="info-producto">
-        <h3>Plan Semanal</h3>
-        <p>3 vasos por semana · ahorra $2.000</p>
-      </div>
-      <span class="precio">$11.500</span>
     </div>
 
-    <button class="btn-principal" onclick="irArmar('personalizado')">¡Arma tu vaso ahora!</button>
+    <button class="btn-principal" style="margin-top:14px;" onclick="irArmar('personalizado')">Arma tu vaso a la carta</button>
+    <p class="mensaje-qr" style="text-align:center;margin-top:8px;">A la carta: +$1.000 por cada topping</p>
   </section>
 
   <!-- ============ ARMA TU VASO ============ -->
@@ -560,17 +643,6 @@
     </div>
 
     <div class="campo">
-      <label for="hora-retiro">Hora de retiro en el campus</label>
-      <select id="hora-retiro">
-        <option>9:30 AM — Descanso mañana</option>
-        <option>12:30 PM — Hora del almuerzo</option>
-        <option>3:30 PM — Descanso tarde</option>
-        <option>6:30 PM — Receso noche</option>
-        <option>8:10 PM — Receso nocturno</option>
-      </select>
-    </div>
-
-    <div class="campo">
       <label for="metodo-pago">Método de pago</label>
       <select id="metodo-pago">
         <option>Nequi</option>
@@ -593,22 +665,30 @@
 
   <!-- ============ PLAN SEMANAL ============ -->
   <section id="view-plan" class="seccion">
-    <h2 class="titulo-seccion">Plan Semanal</h2>
-    <p class="subtitulo">Elige tus 3 vasos de la semana. Pagas $11.500 en vez de $13.500.</p>
+    <h2 class="titulo-seccion" id="titulo-plan">Plan Clásico</h2>
+    <p class="subtitulo" id="subtitulo-plan"></p>
     <div id="cupos-plan"></div>
 
     <div class="barra-precio" style="position:static;">
       <div>
-        <div class="label">Plan de 3 vasos</div>
-        <div class="label" style="font-size:11px;color:#8fe0b1;">Ahorras $2.000 · desde $3.833 por vaso</div>
+        <div class="label" id="plan-detalle-label">Plan de 3 vasos</div>
+        <div class="label" id="plan-detalle-extra" style="font-size:11px;color:#8fe0b1;"></div>
       </div>
-      <div class="valor">$11.500</div>
+      <div class="valor" id="plan-total">$11.000</div>
     </div>
 
-    <div style="height:12px;"></div>
-    <button class="btn-principal" id="btn-plan" onclick="activarPlan()">Activar plan demo</button>
+    <div class="campo" style="margin-top:14px;">
+      <label for="pago-plan">Método de pago</label>
+      <select id="pago-plan">
+        <option>Nequi</option>
+        <option>Daviplata</option>
+        <option>Efectivo en el stand</option>
+      </select>
+    </div>
+
+    <button class="btn-principal" id="btn-plan" onclick="activarPlan()">Activar plan</button>
     <button class="btn-secundario" onclick="cambiarVista('view-inicio')">Volver</button>
-    <p class="mensaje-qr" style="margin-top:12px;text-align:center;">Demostración: no se cobra nada y el plan no se renueva solo.</p>
+    <p class="mensaje-qr" style="margin-top:12px;text-align:center;">Demo: no se cobra nada y el plan no se renueva solo.</p>
   </section>
 
   <!-- ============ MIS TICKETS ============ -->
@@ -663,23 +743,38 @@
   </div>
 </div>
 
+<!-- Edición de un vaso del plan -->
+<div class="modal-fondo" id="modal-editar-plan">
+  <div class="modal">
+    <h3 id="titulo-editar-plan">Editar vaso</h3>
+    <p id="sub-editar-plan">Cambia los toppings de este vaso. Los adicionales cuestan $500.</p>
+    <div id="editor-plan-grupos"></div>
+    <button class="btn-principal" onclick="guardarEdicionPlan()">Guardar cambios</button>
+    <button class="btn-secundario" onclick="cerrarEditarPlan()">Cancelar</button>
+  </div>
+</div>
+
 <script src="/vendor/qrcode.min.js"></script>
 <script>
-const TOPPING = 1000;
+const TOPPING_EXTRA = 500;  // adicional en Estandar y Especial
+const TOPPING_CARTA = 1000; // vaso a la carta
 const PRODUCTOS = {
   estandar: {
     nombre: 'Vaso Estandar', precio: 4500,
-    frutasIncluidas: 1, cerealesIncluidos: 1, maxFrutas: 1, maxCereales: 1,
-    subtitulo: 'Elige tu base, 1 fruta y 1 cereal. Todo incluido en $4.500.',
+    frutasIncluidas: 1, cerealesIncluidos: 1, maxFrutas: 3, maxCereales: 3,
+    precioTopping: TOPPING_EXTRA,
+    subtitulo: 'Elige tu base, 1 fruta y 1 cereal incluidos. Cada adicional +$500.',
   },
   especial: {
     nombre: 'Vaso Especial', precio: 7000,
-    frutasIncluidas: 2, cerealesIncluidos: 2, maxFrutas: 2, maxCereales: 2,
-    subtitulo: 'Elige tus 2 frutas y 2 cereales. Todo incluido desde $7.000.',
+    frutasIncluidas: 2, cerealesIncluidos: 2, maxFrutas: 3, maxCereales: 3,
+    precioTopping: TOPPING_EXTRA,
+    subtitulo: 'Elige tus 2 frutas y 2 cereales incluidos. Cada adicional +$500.',
   },
   personalizado: {
     nombre: 'Vaso Personalizado', precio: 4500,
     frutasIncluidas: 0, cerealesIncluidos: 0, maxFrutas: 3, maxCereales: 3,
+    precioTopping: TOPPING_CARTA,
     subtitulo: 'Armalo a tu gusto: +$1.000 por cada topping.',
   },
 };
@@ -688,7 +783,23 @@ const seleccion = { base: { valor: 'Yogurt griego', precio: 0 }, frutas: [], cer
 
 const RESENAS_POSITIVAS = ['¡Excelente!', 'Muy rico', 'Buen tamaño', 'Llegó rápido'];
 const RESENAS_NEGATIVAS = ['Muy dulce', 'Poca fruta', 'Se demoró', 'Muy caro'];
-const PLAN = { precio: 11500, dias: ['Lunes', 'Miércoles', 'Viernes'], frutas: ['Fresa', 'Banano', 'Arándanos'] };
+
+const FRUTAS = ['Fresa', 'Banano', 'Arándanos'];
+const CEREALES = ['Granola', 'Almendras', 'Avena'];
+const DIAS_PLAN = ['Lunes', 'Miércoles', 'Viernes'];
+const PLANES = {
+  clasico: {
+    nombre: 'Plan Clásico', precio: 11000, normal: 13500, ahorro: 2500,
+    tipo: 'Vaso Estandar', frutas: 1, cereales: 1, cupo: '$3.667',
+  },
+  premium: {
+    nombre: 'Plan Premium', precio: 17000, normal: 21000, ahorro: 4000,
+    tipo: 'Vaso Especial', frutas: 2, cereales: 2, cupo: '$5.667',
+  },
+};
+let planActual = 'clasico';
+let seleccionPlan = [];
+let ultimosPedidos = [];
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -713,8 +824,12 @@ function irArmar(clave) {
   seleccion.cereales = [];
   document.getElementById('titulo-armar').textContent = productoActual === 'personalizado' ? 'Arma tu vaso' : prod.nombre;
   document.getElementById('subtitulo-armar').textContent = prod.subtitulo;
-  document.getElementById('nota-frutas').textContent = `(${prod.maxFrutas === 1 ? 'elige 1' : 'hasta ' + prod.maxFrutas})`;
-  document.getElementById('nota-cereales').textContent = `(${prod.maxCereales === 1 ? 'elige 1' : 'hasta ' + prod.maxCereales})`;
+  document.getElementById('nota-frutas').textContent = productoActual === 'personalizado'
+    ? '(a la carta, hasta 3)'
+    : `(${prod.frutasIncluidas} incluida${prod.frutasIncluidas === 1 ? '' : 's'}, hasta ${prod.maxFrutas})`;
+  document.getElementById('nota-cereales').textContent = productoActual === 'personalizado'
+    ? '(a la carta, hasta 3)'
+    : `(${prod.cerealesIncluidos} incluido${prod.cerealesIncluidos === 1 ? '' : 's'}, hasta ${prod.maxCereales})`;
   actualizarPrecio();
   cambiarVista('view-armar');
 }
@@ -737,16 +852,8 @@ document.querySelectorAll('.chip').forEach((chip) => {
         lista.splice(idx, 1);
         chip.classList.remove('seleccionada');
       } else if (lista.length >= max) {
-        if (max === 1) {
-          const anterior = lista[0];
-          document.querySelector(`#grupo-${grupo} .chip[data-valor="${anterior.valor}"]`).classList.remove('seleccionada');
-          lista.length = 0;
-          lista.push(item);
-          chip.classList.add('seleccionada');
-        } else {
-          toast(`Puedes elegir hasta ${max} ${grupo} en este vaso`);
-          return;
-        }
+        toast(`Máximo ${max} ${grupo} por vaso`);
+        return;
       } else {
         lista.push(item);
         chip.classList.add('seleccionada');
@@ -760,7 +867,7 @@ function calcularTotal() {
   const prod = PRODUCTOS[productoActual];
   const extraFrutas = Math.max(0, seleccion.frutas.length - prod.frutasIncluidas);
   const extraCereales = Math.max(0, seleccion.cereales.length - prod.cerealesIncluidos);
-  return prod.precio + seleccion.base.precio + extraFrutas * TOPPING + extraCereales * TOPPING;
+  return prod.precio + seleccion.base.precio + (extraFrutas + extraCereales) * prod.precioTopping;
 }
 
 function actualizarPrecio() {
@@ -770,10 +877,13 @@ function actualizarPrecio() {
   let detalle;
   if (productoActual === 'personalizado') {
     const extras = seleccion.frutas.length + seleccion.cereales.length;
-    detalle = 'Base $4.500' + (extras > 0 ? ` + ${extras} topping${extras > 1 ? 's' : ''}` : '');
+    detalle = 'Base $4.500' + (extras > 0 ? ` + ${extras} topping${extras > 1 ? 's' : ''} × $1.000` : '');
   } else {
-    detalle = `Incluye ${prod.frutasIncluidas} ${prod.frutasIncluidas === 1 ? 'fruta' : 'frutas'} y ${prod.cerealesIncluidos} ${prod.cerealesIncluidos === 1 ? 'cereal' : 'cereales'}`;
+    const extras = Math.max(0, seleccion.frutas.length - prod.frutasIncluidas) +
+      Math.max(0, seleccion.cereales.length - prod.cerealesIncluidos);
+    detalle = `Incluye ${prod.frutasIncluidas} fruta${prod.frutasIncluidas === 1 ? '' : 's'} y ${prod.cerealesIncluidos} cereal${prod.cerealesIncluidos === 1 ? '' : 'es'}`;
     if (seleccion.base.precio > 0) detalle += ` · base +$${seleccion.base.precio.toLocaleString('es-CO')}`;
+    if (extras > 0) detalle += ` · ${extras} extra${extras > 1 ? 's' : ''} +$${(extras * prod.precioTopping).toLocaleString('es-CO')}`;
   }
   document.getElementById('detalle-precio').textContent = detalle;
 }
@@ -828,7 +938,6 @@ async function confirmarPedido() {
     base: seleccion.base.valor,
     frutas: seleccion.frutas.map((i) => i.valor),
     cereales: seleccion.cereales.map((i) => i.valor),
-    horaRetiro: document.getElementById('hora-retiro').value,
     pago: document.getElementById('metodo-pago').value,
     total: calcularTotal(),
   };
@@ -852,52 +961,109 @@ async function confirmarPedido() {
   cambiarVista('view-ticket');
 }
 
-// ---------- Plan semanal (demostrativo) ----------
-function irPlan() {
-  document.getElementById('cupos-plan').innerHTML = PLAN.dias.map((dia, i) => `
-    <div class="cupo">
-      <h4>${dia}</h4>
-      <div class="cupo-fila" id="cupo-tipo-${i}">
-        <button class="chip seleccionada" data-tipo="Vaso Estandar" onclick="elegirTipoCupo(${i}, this)">Estandar</button>
-        <button class="chip" data-tipo="Vaso Especial" onclick="elegirTipoCupo(${i}, this)">Especial</button>
-      </div>
-      <select id="cupo-fruta-${i}">
-        ${PLAN.frutas.map((f) => `<option>${f}</option>`).join('')}
-      </select>
-    </div>`).join('');
+// ---------- Planes semanales ----------
+function irPlan(clave) {
+  planActual = PLANES[clave] ? clave : 'clasico';
+  const plan = PLANES[planActual];
+  seleccionPlan = DIAS_PLAN.map(() => ({ frutas: [], cereales: [] }));
+  document.getElementById('titulo-plan').textContent = plan.nombre;
+  document.getElementById('subtitulo-plan').textContent =
+    `3 vasos ${plan.tipo.replace('Vaso ', '')} · ${plan.frutas} fruta${plan.frutas === 1 ? '' : 's'} y ${plan.cereales} cereal${plan.cereales === 1 ? '' : 'es'} incluidos por vaso. Cada adicional +$500.`;
+  renderCuposPlan();
+  actualizarPrecioPlan();
   cambiarVista('view-plan');
 }
 
-function elegirTipoCupo(i, btn) {
-  document.querySelectorAll(`#cupo-tipo-${i} .chip`).forEach((c) => c.classList.remove('seleccionada'));
-  btn.classList.add('seleccionada');
+function renderCuposPlan() {
+  const plan = PLANES[planActual];
+  document.getElementById('cupos-plan').innerHTML = DIAS_PLAN.map((dia, i) => `
+    <div class="cupo">
+      <h4>${dia}</h4>
+      <div class="cupo-tipo">${plan.tipo} · ${plan.frutas} fruta${plan.frutas === 1 ? '' : 's'} y ${plan.cereales} cereal${plan.cereales === 1 ? '' : 'es'} incluidos</div>
+      <div class="cupo-grupo">
+        <span class="cupo-label">Frutas</span>
+        <div class="opciones chips-chicos">
+          ${FRUTAS.map((f) => `<button class="chip" onclick="toggleCupoPlan(${i}, 'frutas', '${f}', this)">${f}</button>`).join('')}
+        </div>
+      </div>
+      <div class="cupo-grupo">
+        <span class="cupo-label">Cereales</span>
+        <div class="opciones chips-chicos">
+          ${CEREALES.map((c) => `<button class="chip" onclick="toggleCupoPlan(${i}, 'cereales', '${c}', this)">${c}</button>`).join('')}
+        </div>
+      </div>
+      <div class="cupo-total" id="cupo-total-${i}"></div>
+    </div>`).join('');
+  DIAS_PLAN.forEach((_, i) => actualizarCupoTotal(i));
 }
 
-function detallePlanActual() {
-  return PLAN.dias.map((dia, i) => ({
-    dia,
-    tipo: document.querySelector(`#cupo-tipo-${i} .chip.seleccionada`).dataset.tipo,
-    fruta: document.getElementById(`cupo-fruta-${i}`).value,
-  }));
+function toggleCupoPlan(i, grupo, valor, chip) {
+  const lista = seleccionPlan[i][grupo];
+  const idx = lista.indexOf(valor);
+  if (idx >= 0) {
+    lista.splice(idx, 1);
+    chip.classList.remove('seleccionada');
+  } else if (lista.length >= 3) {
+    toast('Máximo 3 toppings de cada tipo por vaso');
+    return;
+  } else {
+    lista.push(valor);
+    chip.classList.add('seleccionada');
+  }
+  actualizarCupoTotal(i);
+  actualizarPrecioPlan();
+}
+
+function extrasCupoPlan(i) {
+  const plan = PLANES[planActual];
+  const sel = seleccionPlan[i];
+  return Math.max(0, sel.frutas.length - plan.frutas) + Math.max(0, sel.cereales.length - plan.cereales);
+}
+
+function actualizarCupoTotal(i) {
+  const extras = extrasCupoPlan(i);
+  document.getElementById('cupo-total-' + i).textContent = extras
+    ? `${extras} adicional${extras > 1 ? 'es' : ''} +$${(extras * TOPPING_EXTRA).toLocaleString('es-CO')}`
+    : '';
+}
+
+function totalPlanActual() {
+  const plan = PLANES[planActual];
+  return plan.precio + seleccionPlan.reduce((s, _, i) => s + extrasCupoPlan(i) * TOPPING_EXTRA, 0);
+}
+
+function actualizarPrecioPlan() {
+  const plan = PLANES[planActual];
+  const extras = totalPlanActual() - plan.precio;
+  document.getElementById('plan-total').textContent = '$' + totalPlanActual().toLocaleString('es-CO');
+  document.getElementById('plan-detalle-label').textContent =
+    `${plan.nombre} · ahorras $${plan.ahorro.toLocaleString('es-CO')} · ${plan.cupo} por vaso`;
+  document.getElementById('plan-detalle-extra').textContent = extras
+    ? `Incluye $${extras.toLocaleString('es-CO')} en toppings adicionales`
+    : '';
 }
 
 async function activarPlan() {
+  const plan = PLANES[planActual];
+  if (seleccionPlan.some((s) => !s.frutas.length)) {
+    toast('Elige al menos una fruta en cada vaso');
+    return;
+  }
   const btn = document.getElementById('btn-plan');
-  const detallePlan = detallePlanActual();
   btn.disabled = true;
   const textoOriginal = btn.textContent;
   btn.textContent = 'Activando…';
 
   const data = await enviarPedido({
     id: 'YOG-' + Date.now().toString().slice(-6),
-    tipo: 'Plan Semanal',
-    base: 'Yogurt griego',
-    frutas: detallePlan.map((c) => c.fruta),
-    cereales: ['Granola'],
-    horaRetiro: '3 retiros en la semana',
-    pago: 'Nequi',
-    total: PLAN.precio,
-    detallePlan,
+    planClave: planActual,
+    tipo: plan.nombre,
+    pago: document.getElementById('pago-plan').value,
+    detallePlan: DIAS_PLAN.map((dia, i) => ({
+      dia,
+      frutas: seleccionPlan[i].frutas.slice(),
+      cereales: seleccionPlan[i].cereales.slice(),
+    })),
   });
 
   btn.disabled = false;
@@ -908,7 +1074,7 @@ async function activarPlan() {
     return;
   }
   guardarId(data.pedido.id);
-  toast('¡Plan semanal activado!');
+  toast(`¡${plan.nombre} activado!`);
   cambiarVista('view-ticket');
 }
 
@@ -924,14 +1090,19 @@ function ticketEnEdicion() {
   return !!lista.querySelector('.chip-resena.seleccionada');
 }
 
-function recompensasUsadas() {
-  return parseInt(localStorage.getItem('yogapp_recompensas') || '0', 10) || 0;
+// Sellos gastados en recompensas anteriores; al usar el topping el ciclo vuelve a 0
+function sellosBase() {
+  return parseInt(localStorage.getItem('yogapp_sellos_base') || '0', 10) || 0;
 }
 
 function usarRecompensa() {
-  localStorage.setItem('yogapp_recompensas', String(recompensasUsadas() + 1));
+  localStorage.setItem('yogapp_sellos_base', String(sellosBase() + 5));
   toast('¡Disfruta tu topping gratis!');
   cargarMisTickets(true);
+}
+
+function horaCorta(ms) {
+  return new Date(ms).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 }
 
 async function cargarMisTickets(forzar = false) {
@@ -940,6 +1111,8 @@ async function cargarMisTickets(forzar = false) {
   if (!ids.length) {
     document.getElementById('tarjeta-puntos').innerHTML = '';
     cont.innerHTML = '<div class="vacio-tickets">Aún no tienes pedidos.<br>¡Arma tu primer vaso en la pestaña "Arma tu Vaso"!</div>';
+    firmaTickets = '';
+    ultimosPedidos = [];
     return;
   }
 
@@ -954,10 +1127,14 @@ async function cargarMisTickets(forzar = false) {
   // Sin conexión: conservar lo último que se mostró en vez de borrarlo
   if (errorRed && cont.innerHTML.trim()) return;
 
+  ultimosPedidos = pedidos;
+
   const firma = JSON.stringify(pedidos.map((p) => [
     p.id,
     p.estado,
     p.motivo || '',
+    p.total,
+    p.detallePlan ? p.detallePlan.map((c) => [c.entregado ? 1 : 0, c.frutas.join('/'), c.cereales.join('/')]) : 0,
     p.calificacion ? [p.calificacion.estrellas, p.calificacion.comentarios || []] : 0,
   ]));
   if (!forzar && (firma === firmaTickets || ticketEnEdicion())) return;
@@ -965,7 +1142,17 @@ async function cargarMisTickets(forzar = false) {
 
   renderPuntos(pedidos);
 
-  cont.innerHTML = ids.map((id) => {
+  // Los planes activos van aparte hasta que se reclaman los 3 vasos
+  const activos = ids
+    .map((id) => pedidos.find((x) => x.id === id))
+    .filter((p) => p && p.detallePlan && p.estado !== 'Entregado' && p.estado !== 'Cancelado');
+  const resto = ids.filter((id) => !activos.some((p) => p.id === id));
+
+  const htmlActivos = activos.length
+    ? '<div class="plan-titulo-tickets">Mi plan semanal</div>' + activos.map(htmlPlanActivo).join('')
+    : '';
+
+  cont.innerHTML = htmlActivos + resto.map((id) => {
     const p = pedidos.find((x) => x.id === id);
     if (!p) {
       return `<div class="mini-ticket">
@@ -978,14 +1165,15 @@ async function cargarMisTickets(forzar = false) {
     const color = entregado ? '#2c9e63' : cancelado ? '#c94f4f' : '#b06f1f';
 
     const detalle = p.detallePlan
-      ? p.detallePlan.map((c) => `${c.dia}: ${c.tipo.replace('Vaso ', '')} · ${c.fruta}`).join('<br>')
+      ? `${p.tipo} · ${p.detallePlan.length} vasos · <strong>$${p.total.toLocaleString('es-CO')}</strong>`
       : `${p.tipo} · ${p.base} · ${p.frutas.join(', ') || 'sin frutas'}${p.cereales.length ? ' · ' + p.cereales.join(', ') : ''} · <strong>$${p.total.toLocaleString('es-CO')}</strong>`;
 
     let cuerpo;
     if (cancelado) {
-      cuerpo = `<div class="mini-ticket-desc" style="color:#c94f4f;font-weight:600;">Cancelado · Motivo: ${p.motivo || 'sin motivo'}</div>`;
+      cuerpo = `${p.detallePlan ? htmlCupos(p) : ''}
+        <div class="mini-ticket-desc" style="color:#c94f4f;font-weight:600;">Cancelado · Motivo: ${p.motivo || 'sin motivo'}</div>`;
     } else if (entregado) {
-      cuerpo = htmlEntregado(p);
+      cuerpo = `${p.detallePlan ? htmlCupos(p) : ''}${htmlEntregado(p)}`;
     } else {
       cuerpo = `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
          <div class="mensaje-qr">Muestra este QR en el stand para retirar tu vaso</div>
@@ -998,15 +1186,123 @@ async function cargarMisTickets(forzar = false) {
         <span class="estado-txt" style="color:${color};">${p.estado}</span>
       </div>
       <div class="mini-ticket-desc">${detalle}</div>
+      <div class="mini-ticket-desc" style="font-size:11.5px;">Pedido hecho a las ${horaCorta(p.creado)}</div>
       ${cuerpo}
     </div>`;
   }).join('');
 }
 
+function htmlCupos(p) {
+  return `<div class="plan-cupos">${p.detallePlan.map((c) => `
+    <div class="plan-cupo ${c.entregado ? 'hecho' : ''}">
+      <span class="check">${c.entregado ? '✓' : ''}</span>
+      <div class="cupo-info"><strong>${c.dia}</strong> · ${[...c.frutas, ...c.cereales].join(', ') || 'Sin toppings'}</div>
+    </div>`).join('')}</div>`;
+}
+
+function htmlPlanActivo(p) {
+  const hechos = p.detallePlan.filter((c) => c.entregado).length;
+  const pct = (hechos / p.detallePlan.length) * 100;
+  const cupos = p.detallePlan.map((c, i) => `
+    <div class="plan-cupo ${c.entregado ? 'hecho' : ''}">
+      <span class="check">${c.entregado ? '✓' : ''}</span>
+      <div class="cupo-info"><strong>${c.dia}</strong> · ${[...c.frutas, ...c.cereales].join(', ') || 'Sin toppings'}</div>
+      ${c.entregado ? '' : `<button class="btn-editar" onclick="abrirEditarPlan('${p.id}', ${i})">Editar</button>`}
+    </div>`).join('');
+
+  return `<div class="mini-ticket plan-card">
+    <div class="mini-ticket-top">
+      <strong>#${p.id}</strong>
+      <span class="estado-txt" style="color:#b06f1f;">${p.tipo}</span>
+    </div>
+    <div class="mini-ticket-desc">${hechos} de ${p.detallePlan.length} vasos reclamados · <strong>$${p.total.toLocaleString('es-CO')}</strong> · ${p.pago}</div>
+    <div class="mini-ticket-desc" style="font-size:11.5px;">Activado a las ${horaCorta(p.creado)}</div>
+    <div class="progreso-plan"><div style="width:${pct}%"></div></div>
+    <div class="plan-cupos">${cupos}</div>
+    ${hechos < p.detallePlan.length ? `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
+      <div class="mensaje-qr">Escanea este QR en el stand para reclamar tu próximo vaso</div>` : ''}
+    ${hechos === 0 ? `<button class="btn-cancelar" onclick="abrirCancelar('${p.id}')">Cancelar plan</button>` : ''}
+  </div>`;
+}
+
+// ---------- Editar un vaso del plan ----------
+let edicionPlan = null;
+let seleccionEdicion = { frutas: [], cereales: [] };
+
+function abrirEditarPlan(id, indice) {
+  const p = ultimosPedidos.find((x) => x.id === id);
+  if (!p || !p.detallePlan || !p.detallePlan[indice]) return;
+  const cupo = p.detallePlan[indice];
+  edicionPlan = { id, indice };
+  seleccionEdicion = { frutas: cupo.frutas.slice(), cereales: cupo.cereales.slice() };
+  const inc = cupo.tipo === 'Vaso Especial' ? { f: 2, c: 2 } : { f: 1, c: 1 };
+  document.getElementById('titulo-editar-plan').textContent = `${cupo.dia} · ${cupo.tipo}`;
+  document.getElementById('sub-editar-plan').textContent =
+    `Incluye ${inc.f} fruta${inc.f === 1 ? '' : 's'} y ${inc.c} cereal${inc.c === 1 ? '' : 'es'}. Cada adicional cuesta $500.`;
+  document.getElementById('editor-plan-grupos').innerHTML = `
+    <div class="cupo-grupo">
+      <span class="cupo-label">Frutas</span>
+      <div class="opciones chips-chicos">
+        ${FRUTAS.map((f) => `<button class="chip ${seleccionEdicion.frutas.includes(f) ? 'seleccionada' : ''}" onclick="toggleEdicion('frutas', '${f}', this)">${f}</button>`).join('')}
+      </div>
+    </div>
+    <div class="cupo-grupo" style="margin-bottom:18px;">
+      <span class="cupo-label">Cereales</span>
+      <div class="opciones chips-chicos">
+        ${CEREALES.map((c) => `<button class="chip ${seleccionEdicion.cereales.includes(c) ? 'seleccionada' : ''}" onclick="toggleEdicion('cereales', '${c}', this)">${c}</button>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('modal-editar-plan').classList.add('abierto');
+}
+
+function toggleEdicion(grupo, valor, chip) {
+  const lista = seleccionEdicion[grupo];
+  const idx = lista.indexOf(valor);
+  if (idx >= 0) {
+    lista.splice(idx, 1);
+    chip.classList.remove('seleccionada');
+  } else if (lista.length >= 3) {
+    toast('Máximo 3 toppings de cada tipo por vaso');
+    return;
+  } else {
+    lista.push(valor);
+    chip.classList.add('seleccionada');
+  }
+}
+
+function cerrarEditarPlan() {
+  document.getElementById('modal-editar-plan').classList.remove('abierto');
+  edicionPlan = null;
+}
+
+async function guardarEdicionPlan() {
+  if (!edicionPlan) return;
+  if (!seleccionEdicion.frutas.length) {
+    toast('Elige al menos una fruta');
+    return;
+  }
+  try {
+    const res = await fetch(
+      `/api/pedidos/${encodeURIComponent(edicionPlan.id)}/plan/${edicionPlan.indice}/editar`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frutas: seleccionEdicion.frutas, cereales: seleccionEdicion.cereales }),
+      },
+    );
+    if (!res.ok) throw new Error();
+    cerrarEditarPlan();
+    toast('Vaso actualizado');
+    cargarMisTickets(true);
+  } catch {
+    toast('No se pudo actualizar el vaso');
+  }
+}
+
 function renderPuntos(pedidos) {
   const meta = 5;
   const calificados = pedidos.filter((p) => p.calificacion).length;
-  const puntos = Math.max(0, calificados - recompensasUsadas());
+  const puntos = Math.max(0, calificados - sellosBase());
   const llenos = Math.min(puntos, meta);
   const completa = puntos >= meta;
   const sellos = Array.from({ length: meta }, (_, i) =>
@@ -1133,12 +1429,14 @@ async function confirmarCancelacion() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ motivo: motivoCancelar }),
     });
-    if (!res.ok) throw new Error();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'No se pudo cancelar el pedido');
     cerrarCancelar();
     toast('Pedido cancelado');
     cargarMisTickets(true);
-  } catch {
-    toast('No se pudo cancelar el pedido');
+  } catch (e) {
+    cerrarCancelar();
+    toast(e.message || 'No se pudo cancelar el pedido');
   }
   btn.disabled = false;
   btn.textContent = 'Confirmar cancelación';

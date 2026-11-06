@@ -74,7 +74,13 @@
     } else if (data.cancelado) {
       cont.innerHTML = iconoError() + `<h1>Pedido cancelado</h1><p>La orden <span class="orden">#${id}</span> fue cancelada por el cliente, no se debe entregar.</p>`;
     } else if (data.yaEntregado) {
-      cont.innerHTML = iconoOk('#2f7f9e') + `<h1>Ya fue entregado</h1><p>La orden <span class="orden">#${id}</span> ya había sido entregada anteriormente.</p>`;
+      cont.innerHTML = iconoOk('#2f7f9e') + `<h1>Ya fue entregado</h1><p>La orden <span class="orden">#${id}</span> ya tenía todos sus vasos entregados.</p>`;
+    } else if (data.cupo) {
+      cont.innerHTML = iconoOk('#2c9e63') + `<h1>¡Vaso reclamado!</h1><p>La orden <span class="orden">#${id}</span></p>
+        <p style="margin-top:8px;">${data.cupo.dia} · vaso ${data.indice + 1} de 3</p>
+        <p style="margin-top:6px;">${data.planCompleto
+          ? '¡Plan completo! El cliente ya puede calificar su plan en la app.'
+          : 'Escanea el mismo QR en el próximo retiro del plan.'}</p>`;
     } else {
       cont.innerHTML = iconoOk('#2c9e63') + `<h1>¡Entrega confirmada!</h1><p>La orden <span class="orden">#${id}</span> se marcó como <strong>Entregado</strong>. El cliente ya puede disfrutar su vaso.</p>`;
     }

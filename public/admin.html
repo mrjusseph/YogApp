@@ -141,6 +141,35 @@
   }
   .btn-entregar:active { transform: scale(.95); }
   .btn-entregar:disabled { opacity: .6; }
+  .btn-entregar.btn-mini { padding: 7px 13px; font-size: 12px; border-radius: 9px; }
+
+  /* ---------- Planes compactos ---------- */
+  .plan-compacto { padding: 12px 14px; margin-bottom: 10px; }
+  .plan-progreso { height: 6px; background: #f4e6cb; border-radius: 99px; overflow: hidden; margin: 6px 0 2px; }
+  .plan-progreso > div { height: 100%; background: linear-gradient(90deg, var(--acento), #d97c2b); }
+  .plan-estado { font-size: 11px; font-weight: 800; color: #b06f1f; text-transform: uppercase; letter-spacing: .5px; }
+  .plan-cupo-admin {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 12.5px;
+    padding: 6px 0;
+    border-top: 1px dashed #eef4f7;
+  }
+  .plan-cupo-admin .check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid #d8c9a8;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+  .plan-cupo-admin.hecho .check { background: #2c9e63; border-color: #2c9e63; }
+  .plan-cupo-admin.hecho .texto { opacity: .55; }
+  .plan-cupo-admin .texto { flex: 1; color: var(--gris); line-height: 1.4; }
+  .plan-cupo-admin .texto strong { color: var(--texto); }
+
+  .panel-graficas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .panel-graficas { grid-template-columns: 1fr; gap: 6px; } }
 
   .resena { border-bottom: 1px dashed #dcecf2; padding: 10px 2px; }
   .resena:last-child { border-bottom: none; }
@@ -217,28 +246,35 @@
     <div class="panel" style="margin-bottom:20px;">
       <div class="stats">
         <div class="stat"><div class="numero" id="stat-total">0</div><div class="etiqueta">Pedidos totales</div></div>
-        <div class="stat"><div class="numero" id="stat-pend">0</div><div class="etiqueta">Por entregar</div></div>
-        <div class="stat"><div class="numero" id="stat-ingresos">$0</div><div class="etiqueta">Ingresos (entregados)</div></div>
+        <div class="stat"><div class="numero" id="stat-pend">0</div><div class="etiqueta">Vasos por entregar</div></div>
+        <div class="stat"><div class="numero" id="stat-ingresos">$0</div><div class="etiqueta">Ingresos (completados)</div></div>
       </div>
-      <h2 style="margin-top:6px;">Ventas por producto</h2>
-      <div id="chart-productos"></div>
+      <div class="panel-graficas">
+        <div>
+          <h2 style="margin-top:6px;">Ventas por producto</h2>
+          <div id="chart-productos"></div>
+        </div>
+        <div>
+          <h2 style="margin-top:6px;">Pedidos por hora</h2>
+          <div id="chart-horas"></div>
+        </div>
+      </div>
     </div>
 
     <div class="panel" style="margin-bottom:20px;">
-      <h2>Planes semanales</h2>
-      <div id="lista-planes"><div class="vacio">Sin planes activos</div></div>
+      <h2>Pedidos entrantes</h2>
+      <div id="lista-pedidos"><div class="vacio">Esperando el primer pedido…</div></div>
     </div>
 
     <div class="panel">
-      <h2>Pedidos entrantes</h2>
-      <div id="lista-pedidos"><div class="vacio">Esperando el primer pedido…</div></div>
+      <h2>Planes semanales</h2>
+      <div id="lista-planes"><div class="vacio">Sin planes activos</div></div>
     </div>
   </div>
 
   <div>
     <div class="panel" style="margin-bottom:20px;">
       <h2>QR para el stand</h2>
-      <p class="nota-stand">Los jurados escanean este código y la app se abre en su celular.</p>
       <div id="qr-stand"></div>
       <p class="url-stand" id="url-stand"></p>
     </div>
@@ -300,6 +336,27 @@ async function marcarEntregado(id, btn) {
   }
 }
 
+async function entregarCupo(id, indice, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Entregando…';
+  try {
+    const res = await fetch(
+      `/api/pedidos/${encodeURIComponent(id)}/plan/${indice}/entregar`,
+      { method: 'POST' },
+    );
+    if (res.ok) {
+      beep(880, 0.1);
+      cargar();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Entregar';
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Entregar';
+  }
+}
+
 async function cargar() {
   try {
     const [resPedidos, resInv] = await Promise.all([
@@ -320,27 +377,54 @@ function claseEstado(p) {
 }
 
 function tarjetaPedido(p) {
-  const detalle = p.detallePlan
-    ? `<div class="plan-lista">${p.detallePlan.map((c) => `${c.dia}: <strong>${c.tipo}</strong> · ${c.fruta}`).join('<br>')}</div>
-       Pago: ${p.pago}`
-    : `<strong>${p.tipo}</strong> · ${p.base}<br>
+  const detalle = `<strong>${p.tipo}</strong> · ${p.base}<br>
        Frutas: ${p.frutas.join(', ') || 'ninguna'} · Cereales: ${p.cereales.join(', ') || 'ninguno'}<br>
-       Retiro: ${p.horaRetiro} · Pago: ${p.pago}`;
+       Pago: ${p.pago}`;
 
   return `
   <div class="pedido estado-${claseEstado(p)}">
     <div class="pedido-top">
-      <span class="pedido-id">#${p.id}${p.detallePlan ? ' · Plan' : ''}</span>
+      <span class="pedido-id">#${p.id}</span>
       <span class="estado">${p.estado}</span>
     </div>
     <div class="pedido-detalle">${detalle}</div>
     ${p.motivo ? `<div class="motivo-cancelacion">Motivo: ${p.motivo}</div>` : ''}
     <div class="pedido-footer">
-      <span>${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+      <span>Pedido ${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
       <span style="display:flex;gap:10px;align-items:center;">
         <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
         ${p.estado === 'En preparación' ? `<button class="btn-entregar" onclick="marcarEntregado('${p.id}', this)">Marcar entregado</button>` : ''}
       </span>
+    </div>
+  </div>`;
+}
+
+function tarjetaPlan(p) {
+  const total = p.detallePlan.length;
+  const hechos = p.detallePlan.filter((c) => c.entregado).length;
+  const pct = (hechos / total) * 100;
+  const cancelado = p.estado === 'Cancelado';
+  const etiqueta = cancelado ? 'Cancelado' : p.estado === 'Entregado' ? 'Completo' : `${hechos}/${total} vasos`;
+
+  const cupos = p.detallePlan.map((c, i) => `
+    <div class="plan-cupo-admin ${c.entregado ? 'hecho' : ''}">
+      <span class="check">${c.entregado ? '✓' : ''}</span>
+      <span class="texto"><strong>${c.dia}</strong> · ${[...c.frutas, ...c.cereales].join(', ') || 'Sin toppings'}</span>
+      ${!c.entregado && !cancelado ? `<button class="btn-entregar btn-mini" onclick="entregarCupo('${p.id}', ${i}, this)">Entregar</button>` : ''}
+    </div>`).join('');
+
+  return `
+  <div class="pedido plan-compacto estado-${claseEstado(p)}">
+    <div class="pedido-top">
+      <span class="pedido-id">#${p.id} · ${p.tipo}</span>
+      <span class="plan-estado">${etiqueta}</span>
+    </div>
+    <div class="plan-progreso"><div style="width:${pct}%"></div></div>
+    ${cupos}
+    ${p.motivo ? `<div class="motivo-cancelacion">Motivo: ${p.motivo}</div>` : ''}
+    <div class="pedido-footer">
+      <span>Activado ${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+      <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
     </div>
   </div>`;
 }
@@ -354,7 +438,7 @@ function renderPedidos(pedidos) {
     : '<div class="vacio">Esperando el primer pedido…</div>';
 
   document.getElementById('lista-planes').innerHTML = planes.length
-    ? planes.map(tarjetaPedido).join('')
+    ? planes.map(tarjetaPlan).join('')
     : '<div class="vacio">Sin planes activos</div>';
 
   // Alerta visual y sonora cuando llega un pedido nuevo
@@ -368,20 +452,30 @@ function renderPedidos(pedidos) {
   });
   primeraCarga = false;
 
-  const pendientes = pedidos.filter((p) => p.estado === 'En preparación');
+  const vasosPendientes = normales.filter((p) => p.estado === 'En preparación').length +
+    planes
+      .filter((p) => p.estado !== 'Cancelado')
+      .reduce((s, p) => s + p.detallePlan.filter((c) => !c.entregado).length, 0);
   const ingresos = pedidos.filter((p) => p.estado === 'Entregado').reduce((s, p) => s + p.total, 0);
   document.getElementById('stat-total').textContent = pedidos.length;
-  document.getElementById('stat-pend').textContent = pendientes.length;
+  document.getElementById('stat-pend').textContent = vasosPendientes;
   document.getElementById('stat-ingresos').textContent = '$' + ingresos.toLocaleString('es-CO');
 
   renderChartProductos(pedidos.filter((p) => p.estado !== 'Cancelado'));
+  renderChartHoras(pedidos.filter((p) => p.estado !== 'Cancelado'));
   renderResenas(pedidos);
   renderCancelaciones(pedidos);
 }
 
 function renderChartProductos(pedidos) {
   const conteo = {};
-  pedidos.forEach((p) => { conteo[p.tipo] = (conteo[p.tipo] || 0) + 1; });
+  pedidos.forEach((p) => {
+    if (p.detallePlan) {
+      p.detallePlan.forEach((c) => { conteo[c.tipo] = (conteo[c.tipo] || 0) + 1; });
+    } else {
+      conteo[p.tipo] = (conteo[p.tipo] || 0) + 1;
+    }
+  });
   const entradas = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
   const max = Math.max(1, ...entradas.map((e) => e[1]));
   document.getElementById('chart-productos').innerHTML = entradas.length
@@ -391,6 +485,26 @@ function renderChartProductos(pedidos) {
         <div class="barra"><div class="barra-fill" style="width:${(n / max) * 100}%"></div></div>
       </div>`).join('')
     : '<div class="vacio">Sin ventas aún</div>';
+}
+
+function renderChartHoras(pedidos) {
+  const conteo = {};
+  pedidos.forEach((p) => {
+    const h = new Date(p.creado).getHours();
+    conteo[h] = (conteo[h] || 0) + 1;
+  });
+  const horas = [...new Set([17, 18, 19, 20, 21, 22, ...Object.keys(conteo).map(Number)])]
+    .sort((a, b) => a - b);
+  const max = Math.max(1, ...horas.map((h) => conteo[h] || 0));
+  document.getElementById('chart-horas').innerHTML = horas.map((h) => {
+    const n = conteo[h] || 0;
+    const etiqueta = h === 0 ? '12 am' : h === 12 ? '12 pm' : h > 12 ? (h - 12) + ' pm' : h + ' am';
+    return `
+      <div class="inv-item">
+        <div class="inv-info"><span>${etiqueta}</span><span class="inv-cant">${n}</span></div>
+        <div class="barra"><div class="barra-fill" style="width:${(n / max) * 100}%"></div></div>
+      </div>`;
+  }).join('');
 }
 
 function renderResenas(pedidos) {
