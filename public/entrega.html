@@ -71,6 +71,8 @@
 
     if (res.status === 404) {
       cont.innerHTML = iconoError() + `<h1>Pedido no encontrado</h1><p>La orden <span class="orden">#${id}</span> no existe en el sistema.</p>`;
+    } else if (data.cancelado) {
+      cont.innerHTML = iconoError() + `<h1>Pedido cancelado</h1><p>La orden <span class="orden">#${id}</span> fue cancelada por el cliente, no se debe entregar.</p>`;
     } else if (data.yaEntregado) {
       cont.innerHTML = iconoOk('#2f7f9e') + `<h1>Ya fue entregado</h1><p>La orden <span class="orden">#${id}</span> ya había sido entregada anteriormente.</p>`;
     } else {

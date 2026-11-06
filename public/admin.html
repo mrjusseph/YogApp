@@ -81,6 +81,7 @@
   }
   .pedido.estado-preparacion { border-left-color: var(--acento); }
   .pedido.estado-entregado { border-left-color: #54b884; opacity: .55; }
+  .pedido.estado-cancelado { border-left-color: #c94f4f; opacity: .7; }
   .pedido-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
   .pedido-id { font-weight: 800; font-size: 15px; }
   .estado {
@@ -93,6 +94,18 @@
   }
   .estado-preparacion .estado { background: #fdf0df; color: #b06f1f; }
   .estado-entregado .estado { background: #e2f6eb; color: #2c7a52; }
+  .estado-cancelado .estado { background: #fdeaea; color: #a83c3c; }
+  .motivo-cancelacion {
+    margin-top: 7px;
+    font-size: 12.5px;
+    color: #a83c3c;
+    background: #fdeaea;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+  .plan-lista { margin: 4px 0; }
+  .plan-lista strong { color: var(--texto); }
   .pedido-detalle { font-size: 13.5px; color: var(--gris); line-height: 1.5; }
   .pedido-detalle strong { color: var(--texto); }
   .pedido-footer {
@@ -134,6 +147,15 @@
   .resena-estrellas { color: var(--acento); font-size: 16px; letter-spacing: 2px; }
   .resena-comentario { font-size: 13px; margin-top: 2px; }
   .resena-meta { font-size: 11.5px; color: var(--gris); margin-top: 2px; }
+  .resena-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+  .resena-chips span {
+    background: var(--azul-claro);
+    color: var(--azul-oscuro);
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
 
   /* ---------- Inventario ---------- */
   .inv-item { margin-bottom: 12px; }
@@ -194,12 +216,17 @@
   <div>
     <div class="panel" style="margin-bottom:20px;">
       <div class="stats">
-        <div class="stat"><div class="numero" id="stat-total">0</div><div class="etiqueta">Pedidos hoy</div></div>
+        <div class="stat"><div class="numero" id="stat-total">0</div><div class="etiqueta">Pedidos totales</div></div>
         <div class="stat"><div class="numero" id="stat-pend">0</div><div class="etiqueta">Por entregar</div></div>
-        <div class="stat"><div class="numero" id="stat-ingresos">$0</div><div class="etiqueta">Ingresos</div></div>
+        <div class="stat"><div class="numero" id="stat-ingresos">$0</div><div class="etiqueta">Ingresos (entregados)</div></div>
       </div>
       <h2 style="margin-top:6px;">Ventas por producto</h2>
       <div id="chart-productos"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <h2>Planes semanales</h2>
+      <div id="lista-planes"><div class="vacio">Sin planes activos</div></div>
     </div>
 
     <div class="panel">
@@ -219,6 +246,11 @@
     <div class="panel" style="margin-bottom:20px;">
       <h2>Calificaciones de clientes</h2>
       <div id="lista-resenas"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+      <h2>Motivos de cancelación</h2>
+      <div id="lista-cancelaciones"></div>
     </div>
 
     <div class="panel">
@@ -281,34 +313,49 @@ async function cargar() {
   } catch { /* el servidor no responde, reintentar en el próximo ciclo */ }
 }
 
+function claseEstado(p) {
+  if (p.estado === 'Entregado') return 'entregado';
+  if (p.estado === 'Cancelado') return 'cancelado';
+  return 'preparacion';
+}
+
+function tarjetaPedido(p) {
+  const detalle = p.detallePlan
+    ? `<div class="plan-lista">${p.detallePlan.map((c) => `${c.dia}: <strong>${c.tipo}</strong> · ${c.fruta}`).join('<br>')}</div>
+       Pago: ${p.pago}`
+    : `<strong>${p.tipo}</strong> · ${p.base}<br>
+       Frutas: ${p.frutas.join(', ') || 'ninguna'} · Cereales: ${p.cereales.join(', ') || 'ninguno'}<br>
+       Retiro: ${p.horaRetiro} · Pago: ${p.pago}`;
+
+  return `
+  <div class="pedido estado-${claseEstado(p)}">
+    <div class="pedido-top">
+      <span class="pedido-id">#${p.id}${p.detallePlan ? ' · Plan' : ''}</span>
+      <span class="estado">${p.estado}</span>
+    </div>
+    <div class="pedido-detalle">${detalle}</div>
+    ${p.motivo ? `<div class="motivo-cancelacion">Motivo: ${p.motivo}</div>` : ''}
+    <div class="pedido-footer">
+      <span>${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+      <span style="display:flex;gap:10px;align-items:center;">
+        <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
+        ${p.estado === 'En preparación' ? `<button class="btn-entregar" onclick="marcarEntregado('${p.id}', this)">Marcar entregado</button>` : ''}
+      </span>
+    </div>
+  </div>`;
+}
+
 function renderPedidos(pedidos) {
-  const lista = document.getElementById('lista-pedidos');
-  if (!pedidos.length) {
-    lista.innerHTML = '<div class="vacio">Esperando el primer pedido…</div>';
-  } else {
-    lista.innerHTML = pedidos.map((p) => {
-      const entregado = p.estado === 'Entregado';
-      return `
-      <div class="pedido estado-${entregado ? 'entregado' : 'preparacion'}">
-        <div class="pedido-top">
-          <span class="pedido-id">#${p.id}</span>
-          <span class="estado">${p.estado}</span>
-        </div>
-        <div class="pedido-detalle">
-          <strong>${p.tipo}</strong> · ${p.base}<br>
-          Frutas: ${p.frutas.join(', ') || 'ninguna'} · Cereales: ${p.cereales.join(', ') || 'ninguno'}<br>
-          Retiro: ${p.horaRetiro} · Pago: ${p.pago}
-        </div>
-        <div class="pedido-footer">
-          <span>${new Date(p.creado).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
-          <span style="display:flex;gap:10px;align-items:center;">
-            <span class="pedido-total">$${p.total.toLocaleString('es-CO')}</span>
-            ${entregado ? '' : `<button class="btn-entregar" onclick="marcarEntregado('${p.id}', this)">Marcar entregado</button>`}
-          </span>
-        </div>
-      </div>`;
-    }).join('');
-  }
+  const normales = pedidos.filter((p) => !p.detallePlan);
+  const planes = pedidos.filter((p) => p.detallePlan);
+
+  document.getElementById('lista-pedidos').innerHTML = normales.length
+    ? normales.map(tarjetaPedido).join('')
+    : '<div class="vacio">Esperando el primer pedido…</div>';
+
+  document.getElementById('lista-planes').innerHTML = planes.length
+    ? planes.map(tarjetaPedido).join('')
+    : '<div class="vacio">Sin planes activos</div>';
 
   // Alerta visual y sonora cuando llega un pedido nuevo
   pedidos.forEach((p) => {
@@ -321,14 +368,15 @@ function renderPedidos(pedidos) {
   });
   primeraCarga = false;
 
-  const pendientes = pedidos.filter((p) => p.estado !== 'Entregado');
+  const pendientes = pedidos.filter((p) => p.estado === 'En preparación');
+  const ingresos = pedidos.filter((p) => p.estado === 'Entregado').reduce((s, p) => s + p.total, 0);
   document.getElementById('stat-total').textContent = pedidos.length;
   document.getElementById('stat-pend').textContent = pendientes.length;
-  document.getElementById('stat-ingresos').textContent =
-    '$' + pedidos.reduce((s, p) => s + p.total, 0).toLocaleString('es-CO');
+  document.getElementById('stat-ingresos').textContent = '$' + ingresos.toLocaleString('es-CO');
 
-  renderChartProductos(pedidos);
+  renderChartProductos(pedidos.filter((p) => p.estado !== 'Cancelado'));
   renderResenas(pedidos);
+  renderCancelaciones(pedidos);
 }
 
 function renderChartProductos(pedidos) {
@@ -348,13 +396,27 @@ function renderChartProductos(pedidos) {
 function renderResenas(pedidos) {
   const resenas = pedidos.filter((p) => p.calificacion);
   document.getElementById('lista-resenas').innerHTML = resenas.length
-    ? resenas.map((p) => `
+    ? resenas.map((p) => {
+      const chips = (p.calificacion.comentarios || []).map((c) => `<span>${c}</span>`).join('');
+      return `
       <div class="resena">
         <div class="resena-estrellas">${'★'.repeat(p.calificacion.estrellas)}${'☆'.repeat(5 - p.calificacion.estrellas)}</div>
-        ${p.calificacion.comentario ? `<div class="resena-comentario">"${p.calificacion.comentario}"</div>` : ''}
+        ${chips ? `<div class="resena-chips">${chips}</div>` : ''}
         <div class="resena-meta">#${p.id} · ${p.tipo}</div>
-      </div>`).join('')
+      </div>`;
+    }).join('')
     : '<div class="vacio">Aún no hay calificaciones</div>';
+}
+
+function renderCancelaciones(pedidos) {
+  const cancelados = pedidos.filter((p) => p.estado === 'Cancelado');
+  document.getElementById('lista-cancelaciones').innerHTML = cancelados.length
+    ? cancelados.slice(0, 8).map((p) => `
+      <div class="resena">
+        <div class="resena-comentario"><strong>#${p.id}</strong> · ${p.motivo || 'sin motivo'}</div>
+        <div class="resena-meta">${p.tipo} · $${p.total.toLocaleString('es-CO')}</div>
+      </div>`).join('')
+    : '<div class="vacio">Sin cancelaciones</div>';
 }
 
 function renderInventario(inventario) {

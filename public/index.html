@@ -166,6 +166,13 @@
     color: #fff;
     box-shadow: 0 4px 10px rgba(47,127,158,.3);
   }
+  .nota-grupo {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--gris);
+    font-weight: 500;
+    font-size: 12px;
+  }
 
   /* ---------- Precio dinámico ---------- */
   .barra-precio {
@@ -242,21 +249,64 @@
   .qr-mini img { border-radius: 8px; }
   .vacio-tickets { text-align: center; color: var(--gris); padding: 28px 12px; font-size: 14px; line-height: 1.6; }
 
-  .tarjeta-puntos {
-    background: linear-gradient(150deg, var(--acento), #d97c2b);
+  /* ---------- Misión de sellos ---------- */
+  .mision {
+    background: linear-gradient(150deg, #ffb968, #d97c2b);
     color: #fff;
-    border-radius: 16px;
-    padding: 14px 18px;
+    border-radius: 18px;
+    padding: 16px 18px;
     margin-bottom: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 14px rgba(217, 124, 43, .3);
+    box-shadow: 0 6px 18px rgba(217, 124, 43, .35);
   }
-  .tarjeta-puntos .puntos-num { font-size: 24px; font-weight: 800; }
-  .tarjeta-puntos .puntos-txt { font-size: 12.5px; opacity: .95; }
-  .tarjeta-puntos .puntos-icono { font-size: 30px; }
+  .mision.completa {
+    background: linear-gradient(150deg, #ffd86b, #e0a01b);
+    box-shadow: 0 6px 22px rgba(224, 160, 27, .5);
+  }
+  .mision-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .mision-titulo { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .mision-contador {
+    font-size: 13px;
+    font-weight: 800;
+    background: rgba(255,255,255,.25);
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sellos { display: flex; gap: 8px; margin: 12px 0 10px; }
+  .sello {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255,255,255,.65);
+    background: rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    color: rgba(255,255,255,.75);
+  }
+  .sello.lleno {
+    background: #fff;
+    border: 2px solid #fff;
+    color: #d97c2b;
+    box-shadow: 0 3px 8px rgba(0,0,0,.18);
+    animation: sello-pop .3s ease;
+  }
+  @keyframes sello-pop { from { transform: scale(.4); } to { transform: scale(1); } }
+  .mision-barra { height: 9px; background: rgba(255,255,255,.28); border-radius: 99px; overflow: hidden; }
+  .mision-barra > div { height: 100%; background: #fff; border-radius: 99px; transition: width .4s ease; }
+  .mision-txt { font-size: 12px; margin-top: 8px; opacity: .96; line-height: 1.45; }
+  .mision-accion {
+    margin-top: 11px;
+    width: 100%;
+    border: none;
+    background: #fff;
+    color: #d97c2b;
+    font-weight: 800;
+    padding: 11px;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
 
+  /* ---------- Calificación ---------- */
   .estrellas { margin: 8px 0 2px; }
   .estrella {
     background: none;
@@ -270,25 +320,112 @@
   .estrella.activa { color: var(--acento); }
   .estrella:active { transform: scale(1.25); }
   .estrellas-leidas { color: var(--acento); font-size: 18px; letter-spacing: 2px; margin-top: 4px; }
-  .input-resena {
-    width: 100%;
-    padding: 10px 12px;
+  .chips-resena { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin: 10px 0 4px; }
+  .chip-resena {
     border: 2px solid #d4e9f0;
-    border-radius: 11px;
-    font-size: 13.5px;
-    margin-top: 8px;
+    background: #fff;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texto);
+    cursor: pointer;
+  }
+  .chip-resena.seleccionada { background: var(--azul); border-color: var(--azul); color: #fff; }
+  .chip-resena.negativa.seleccionada { background: #c94f4f; border-color: #c94f4f; }
+  .resena-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 6px; }
+  .resena-chips span {
+    background: var(--azul-claro);
+    color: var(--azul-oscuro);
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 600;
   }
   .btn-calificar {
-    margin-top: 8px;
+    margin-top: 10px;
     background: var(--azul);
     color: #fff;
     border: none;
-    padding: 10px 18px;
+    padding: 11px 20px;
     border-radius: 11px;
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
   }
+  .btn-calificar:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-cancelar {
+    margin-top: 10px;
+    background: none;
+    border: 2px solid #f0c6c6;
+    color: #c94f4f;
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 9px 16px;
+    border-radius: 11px;
+    cursor: pointer;
+  }
+
+  /* ---------- Plan semanal ---------- */
+  .cinta {
+    position: absolute;
+    top: -9px;
+    right: 14px;
+    background: var(--acento);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    box-shadow: 0 3px 8px rgba(217,124,43,.4);
+  }
+  .cupo { background: var(--azul-claro); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+  .cupo h4 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--azul-oscuro);
+    margin-bottom: 8px;
+  }
+  .cupo-fila { display: flex; gap: 8px; margin-bottom: 8px; }
+  .cupo-fila .chip { flex: 1; text-align: center; }
+  .cupo select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #d4e9f0;
+    border-radius: 12px;
+    font-size: 13.5px;
+    background: #fff;
+    color: var(--texto);
+    appearance: none;
+  }
+  .desde { font-size: 10px; display: block; font-weight: 600; color: var(--gris); }
+
+  /* ---------- Modal de cancelación ---------- */
+  .modal-fondo {
+    position: fixed;
+    inset: 0;
+    background: rgba(35,64,77,.55);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-fondo.abierto { display: flex; }
+  .modal {
+    background: #fff;
+    width: 100%;
+    max-width: 430px;
+    border-radius: 22px 22px 0 0;
+    padding: 22px 20px max(22px, env(safe-area-inset-bottom));
+    animation: subir .25s ease;
+  }
+  @keyframes subir { from { transform: translateY(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal h3 { font-size: 17px; margin-bottom: 4px; }
+  .modal p { font-size: 13px; color: var(--gris); margin-bottom: 14px; line-height: 1.5; }
+  .modal .chips-resena { justify-content: flex-start; margin-bottom: 16px; }
+  .modal .btn-principal { font-size: 15px; padding: 14px; }
 
   /* ---------- Navegación inferior ---------- */
   .nav-inferior {
@@ -359,7 +496,7 @@
       </div>
       <div class="info-producto">
         <h3>Vaso Estandar</h3>
-        <p>Yogurt griego · 1 fruta · granola</p>
+        <p>Yogurt · 1 fruta · 1 cereal</p>
       </div>
       <span class="precio">$4.500</span>
     </div>
@@ -370,29 +507,30 @@
       </div>
       <div class="info-producto">
         <h3>Vaso Especial</h3>
-        <p>Doble fruta · toppings premium</p>
+        <p>2 frutas · 2 cereales · ahorra $1.500</p>
       </div>
-      <span class="precio">$8.000</span>
+      <span class="precio"><span class="desde">desde</span>$7.000</span>
     </div>
 
-    <div class="card-producto" style="cursor:default;">
+    <div class="card-producto" style="position:relative;cursor:pointer;" onclick="irPlan()">
+      <span class="cinta">MÁS POPULAR</span>
       <div class="icono-vaso" style="background:linear-gradient(150deg,#9fd8b9,#4f9e74);">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
       </div>
       <div class="info-producto">
-        <h3>Plan Suscripción</h3>
-        <p>3 vasos por semana · ahorra 15%</p>
+        <h3>Plan Semanal</h3>
+        <p>3 vasos por semana · ahorra $2.000</p>
       </div>
       <span class="precio">$11.500</span>
     </div>
 
-    <button class="btn-principal" onclick="irArmar('estandar')">¡Arma tu vaso ahora!</button>
+    <button class="btn-principal" onclick="irArmar('personalizado')">¡Arma tu vaso ahora!</button>
   </section>
 
   <!-- ============ ARMA TU VASO ============ -->
   <section id="view-armar" class="seccion">
-    <h2 class="titulo-seccion">Arma tu vaso</h2>
-    <p class="subtitulo">Personalízalo a tu gusto, el precio se calcula al instante.</p>
+    <h2 class="titulo-seccion" id="titulo-armar">Arma tu vaso</h2>
+    <p class="subtitulo" id="subtitulo-armar">Personalízalo a tu gusto, el precio se calcula al instante.</p>
 
     <div class="paso">
       <h4><span class="num">1</span> Base de yogurt</h4>
@@ -404,7 +542,7 @@
     </div>
 
     <div class="paso">
-      <h4><span class="num">2</span> Frutas frescas <span style="text-transform:none;letter-spacing:0;color:var(--gris);font-weight:500;">(+$1.000 c/u)</span></h4>
+      <h4><span class="num">2</span> Frutas frescas <span class="nota-grupo" id="nota-frutas"></span></h4>
       <div class="opciones" id="grupo-frutas">
         <button class="chip" data-grupo="frutas" data-valor="Fresa" data-precio="1000">Fresa</button>
         <button class="chip" data-grupo="frutas" data-valor="Banano" data-precio="1000">Banano</button>
@@ -413,7 +551,7 @@
     </div>
 
     <div class="paso">
-      <h4><span class="num">3</span> Cereales &amp; crunch <span style="text-transform:none;letter-spacing:0;color:var(--gris);font-weight:500;">(+$1.000 c/u)</span></h4>
+      <h4><span class="num">3</span> Cereales &amp; crunch <span class="nota-grupo" id="nota-cereales"></span></h4>
       <div class="opciones" id="grupo-cereales">
         <button class="chip" data-grupo="cereales" data-valor="Granola" data-precio="1000">Granola Crujiente</button>
         <button class="chip" data-grupo="cereales" data-valor="Almendras" data-precio="1000">Almendras</button>
@@ -453,6 +591,26 @@
     <button class="btn-principal" id="btn-confirmar" onclick="confirmarPedido()">Confirmar pedido Pick &amp; Go</button>
   </section>
 
+  <!-- ============ PLAN SEMANAL ============ -->
+  <section id="view-plan" class="seccion">
+    <h2 class="titulo-seccion">Plan Semanal</h2>
+    <p class="subtitulo">Elige tus 3 vasos de la semana. Pagas $11.500 en vez de $13.500.</p>
+    <div id="cupos-plan"></div>
+
+    <div class="barra-precio" style="position:static;">
+      <div>
+        <div class="label">Plan de 3 vasos</div>
+        <div class="label" style="font-size:11px;color:#8fe0b1;">Ahorras $2.000 · desde $3.833 por vaso</div>
+      </div>
+      <div class="valor">$11.500</div>
+    </div>
+
+    <div style="height:12px;"></div>
+    <button class="btn-principal" id="btn-plan" onclick="activarPlan()">Activar plan demo</button>
+    <button class="btn-secundario" onclick="cambiarVista('view-inicio')">Volver</button>
+    <p class="mensaje-qr" style="margin-top:12px;text-align:center;">Demostración: no se cobra nada y el plan no se renueva solo.</p>
+  </section>
+
   <!-- ============ MIS TICKETS ============ -->
   <section id="view-ticket" class="seccion">
     <h2 class="titulo-seccion">Mis tickets</h2>
@@ -480,10 +638,57 @@
 
 <div id="toast"></div>
 
+<!-- Cancelación en dos toques -->
+<div class="modal-fondo" id="modal-cancelar">
+  <div class="modal">
+    <div id="paso-1">
+      <h3>¿Seguro que quieres cancelar?</h3>
+      <p id="texto-cancelar">Vas a cancelar el pedido.</p>
+      <button class="btn-principal" onclick="irMotivos()">Sí, cancelar</button>
+      <button class="btn-secundario" onclick="cerrarCancelar()">No, volver</button>
+    </div>
+    <div id="paso-2" style="display:none;">
+      <h3>¿Por qué cancelas?</h3>
+      <p>Un toque es suficiente, nos ayuda a mejorar.</p>
+      <div class="chips-resena" id="motivos-cancelar">
+        <button class="chip-resena" onclick="elegirMotivo(this)">Ya no puedo recogerlo</button>
+        <button class="chip-resena" onclick="elegirMotivo(this)">Cambié de idea</button>
+        <button class="chip-resena" onclick="elegirMotivo(this)">Se demoraba mucho</button>
+        <button class="chip-resena negativa" onclick="elegirMotivo(this)">No me convenció el precio</button>
+        <button class="chip-resena negativa" onclick="elegirMotivo(this)">Pedí por error</button>
+      </div>
+      <button class="btn-principal" id="btn-confirmar-cancel" disabled onclick="confirmarCancelacion()">Confirmar cancelación</button>
+      <button class="btn-secundario" onclick="cerrarCancelar()">Volver</button>
+    </div>
+  </div>
+</div>
+
 <script src="/vendor/qrcode.min.js"></script>
 <script>
-const PRECIO_BASE = 4500;
+const TOPPING = 1000;
+const PRODUCTOS = {
+  estandar: {
+    nombre: 'Vaso Estandar', precio: 4500,
+    frutasIncluidas: 1, cerealesIncluidos: 1, maxFrutas: 1, maxCereales: 1,
+    subtitulo: 'Elige tu base, 1 fruta y 1 cereal. Todo incluido en $4.500.',
+  },
+  especial: {
+    nombre: 'Vaso Especial', precio: 7000,
+    frutasIncluidas: 2, cerealesIncluidos: 2, maxFrutas: 2, maxCereales: 2,
+    subtitulo: 'Elige tus 2 frutas y 2 cereales. Todo incluido desde $7.000.',
+  },
+  personalizado: {
+    nombre: 'Vaso Personalizado', precio: 4500,
+    frutasIncluidas: 0, cerealesIncluidos: 0, maxFrutas: 3, maxCereales: 3,
+    subtitulo: 'Armalo a tu gusto: +$1.000 por cada topping.',
+  },
+};
+let productoActual = 'personalizado';
 const seleccion = { base: { valor: 'Yogurt griego', precio: 0 }, frutas: [], cereales: [] };
+
+const RESENAS_POSITIVAS = ['¡Excelente!', 'Muy rico', 'Buen tamaño', 'Llegó rápido'];
+const RESENAS_NEGATIVAS = ['Muy dulce', 'Poca fruta', 'Se demoró', 'Muy caro'];
+const PLAN = { precio: 11500, dias: ['Lunes', 'Miércoles', 'Viernes'], frutas: ['Fresa', 'Banano', 'Arándanos'] };
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -500,22 +705,16 @@ function cambiarVista(id) {
   if (id === 'view-ticket') cargarMisTickets();
 }
 
-function irArmar(tipo) {
-  if (tipo === 'especial') {
-    // Preselección del especial: doble fruta + toppings
-    document.querySelectorAll('#grupo-frutas .chip, #grupo-cereales .chip').forEach((c) => c.classList.remove('seleccionada'));
-    seleccion.frutas = [];
-    seleccion.cereales = [];
-    document.querySelector('#grupo-frutas .chip[data-valor="Fresa"]').classList.add('seleccionada');
-    document.querySelector('#grupo-frutas .chip[data-valor="Banano"]').classList.add('seleccionada');
-    document.querySelector('#grupo-cereales .chip[data-valor="Granola"]').classList.add('seleccionada');
-    seleccion.frutas = [
-      { valor: 'Fresa', precio: 1000 },
-      { valor: 'Banano', precio: 1000 },
-    ];
-    seleccion.cereales = [{ valor: 'Granola', precio: 1000 }];
-    toast('Vaso Especial pre-cargado: ajusta los toppings a tu gusto');
-  }
+function irArmar(clave) {
+  productoActual = PRODUCTOS[clave] ? clave : 'personalizado';
+  const prod = PRODUCTOS[productoActual];
+  document.querySelectorAll('#grupo-frutas .chip, #grupo-cereales .chip').forEach((c) => c.classList.remove('seleccionada'));
+  seleccion.frutas = [];
+  seleccion.cereales = [];
+  document.getElementById('titulo-armar').textContent = productoActual === 'personalizado' ? 'Arma tu vaso' : prod.nombre;
+  document.getElementById('subtitulo-armar').textContent = prod.subtitulo;
+  document.getElementById('nota-frutas').textContent = `(${prod.maxFrutas === 1 ? 'elige 1' : 'hasta ' + prod.maxFrutas})`;
+  document.getElementById('nota-cereales').textContent = `(${prod.maxCereales === 1 ? 'elige 1' : 'hasta ' + prod.maxCereales})`;
   actualizarPrecio();
   cambiarVista('view-armar');
 }
@@ -530,12 +729,26 @@ document.querySelectorAll('.chip').forEach((chip) => {
       chip.classList.add('seleccionada');
       seleccion.base = item;
     } else {
-      const idx = seleccion[grupo].findIndex((i) => i.valor === item.valor);
+      const prod = PRODUCTOS[productoActual];
+      const max = grupo === 'frutas' ? prod.maxFrutas : prod.maxCereales;
+      const lista = seleccion[grupo];
+      const idx = lista.findIndex((i) => i.valor === item.valor);
       if (idx >= 0) {
-        seleccion[grupo].splice(idx, 1);
+        lista.splice(idx, 1);
         chip.classList.remove('seleccionada');
+      } else if (lista.length >= max) {
+        if (max === 1) {
+          const anterior = lista[0];
+          document.querySelector(`#grupo-${grupo} .chip[data-valor="${anterior.valor}"]`).classList.remove('seleccionada');
+          lista.length = 0;
+          lista.push(item);
+          chip.classList.add('seleccionada');
+        } else {
+          toast(`Puedes elegir hasta ${max} ${grupo} en este vaso`);
+          return;
+        }
       } else {
-        seleccion[grupo].push(item);
+        lista.push(item);
         chip.classList.add('seleccionada');
       }
     }
@@ -544,17 +757,25 @@ document.querySelectorAll('.chip').forEach((chip) => {
 });
 
 function calcularTotal() {
-  return PRECIO_BASE + seleccion.base.precio +
-    seleccion.frutas.reduce((s, i) => s + i.precio, 0) +
-    seleccion.cereales.reduce((s, i) => s + i.precio, 0);
+  const prod = PRODUCTOS[productoActual];
+  const extraFrutas = Math.max(0, seleccion.frutas.length - prod.frutasIncluidas);
+  const extraCereales = Math.max(0, seleccion.cereales.length - prod.cerealesIncluidos);
+  return prod.precio + seleccion.base.precio + extraFrutas * TOPPING + extraCereales * TOPPING;
 }
 
 function actualizarPrecio() {
+  const prod = PRODUCTOS[productoActual];
   const total = calcularTotal();
   document.getElementById('precio-total').textContent = '$' + total.toLocaleString('es-CO');
-  const extras = seleccion.frutas.length + seleccion.cereales.length;
-  document.getElementById('detalle-precio').textContent =
-    'Base $4.500' + (extras > 0 ? ` + ${extras} topping${extras > 1 ? 's' : ''}` : '');
+  let detalle;
+  if (productoActual === 'personalizado') {
+    const extras = seleccion.frutas.length + seleccion.cereales.length;
+    detalle = 'Base $4.500' + (extras > 0 ? ` + ${extras} topping${extras > 1 ? 's' : ''}` : '');
+  } else {
+    detalle = `Incluye ${prod.frutasIncluidas} ${prod.frutasIncluidas === 1 ? 'fruta' : 'frutas'} y ${prod.cerealesIncluidos} ${prod.cerealesIncluidos === 1 ? 'cereal' : 'cereales'}`;
+    if (seleccion.base.precio > 0) detalle += ` · base +$${seleccion.base.precio.toLocaleString('es-CO')}`;
+  }
+  document.getElementById('detalle-precio').textContent = detalle;
 }
 
 function misIds() {
@@ -577,13 +798,33 @@ function qrImg(url, scale) {
   return qr.createImgTag(scale, 6);
 }
 
+async function enviarPedido(pedido) {
+  for (let intento = 1; intento <= 3; intento++) {
+    try {
+      const res = await fetch('/api/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pedido),
+      });
+      if (!res.ok) throw new Error();
+      return await res.json();
+    } catch {
+      if (intento < 3) {
+        toast('El servidor está despertando… reintento ' + intento + ' de 2');
+        await new Promise((r) => setTimeout(r, 5000));
+      }
+    }
+  }
+  return null;
+}
+
 async function confirmarPedido() {
   const btn = document.getElementById('btn-confirmar');
   const pedido = {
     // El id lo genera el cliente: si el servidor se duerme y hay que reintentar,
     // el mismo número se reutiliza y el pedido nunca se duplica
     id: 'YOG-' + Date.now().toString().slice(-6),
-    tipo: seleccion.base.valor === 'Yogurt griego' && seleccion.frutas.length <= 1 ? 'Vaso Estandar' : 'Vaso Personalizado',
+    tipo: PRODUCTOS[productoActual].nombre,
     base: seleccion.base.valor,
     frutas: seleccion.frutas.map((i) => i.valor),
     cereales: seleccion.cereales.map((i) => i.valor),
@@ -596,23 +837,7 @@ async function confirmarPedido() {
   const textoOriginal = btn.textContent;
   btn.textContent = 'Enviando pedido…';
 
-  let data = null;
-  for (let intento = 1; intento <= 3 && !data; intento++) {
-    try {
-      const res = await fetch('/api/pedidos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pedido),
-      });
-      if (!res.ok) throw new Error();
-      data = await res.json();
-    } catch {
-      if (intento < 3) {
-        toast('El servidor está despertando… reintento ' + intento + ' de 2');
-        await new Promise((r) => setTimeout(r, 5000));
-      }
-    }
-  }
+  const data = await enviarPedido(pedido);
 
   btn.disabled = false;
   btn.textContent = textoOriginal;
@@ -627,14 +852,86 @@ async function confirmarPedido() {
   cambiarVista('view-ticket');
 }
 
+// ---------- Plan semanal (demostrativo) ----------
+function irPlan() {
+  document.getElementById('cupos-plan').innerHTML = PLAN.dias.map((dia, i) => `
+    <div class="cupo">
+      <h4>${dia}</h4>
+      <div class="cupo-fila" id="cupo-tipo-${i}">
+        <button class="chip seleccionada" data-tipo="Vaso Estandar" onclick="elegirTipoCupo(${i}, this)">Estandar</button>
+        <button class="chip" data-tipo="Vaso Especial" onclick="elegirTipoCupo(${i}, this)">Especial</button>
+      </div>
+      <select id="cupo-fruta-${i}">
+        ${PLAN.frutas.map((f) => `<option>${f}</option>`).join('')}
+      </select>
+    </div>`).join('');
+  cambiarVista('view-plan');
+}
+
+function elegirTipoCupo(i, btn) {
+  document.querySelectorAll(`#cupo-tipo-${i} .chip`).forEach((c) => c.classList.remove('seleccionada'));
+  btn.classList.add('seleccionada');
+}
+
+function detallePlanActual() {
+  return PLAN.dias.map((dia, i) => ({
+    dia,
+    tipo: document.querySelector(`#cupo-tipo-${i} .chip.seleccionada`).dataset.tipo,
+    fruta: document.getElementById(`cupo-fruta-${i}`).value,
+  }));
+}
+
+async function activarPlan() {
+  const btn = document.getElementById('btn-plan');
+  const detallePlan = detallePlanActual();
+  btn.disabled = true;
+  const textoOriginal = btn.textContent;
+  btn.textContent = 'Activando…';
+
+  const data = await enviarPedido({
+    id: 'YOG-' + Date.now().toString().slice(-6),
+    tipo: 'Plan Semanal',
+    base: 'Yogurt griego',
+    frutas: detallePlan.map((c) => c.fruta),
+    cereales: ['Granola'],
+    horaRetiro: '3 retiros en la semana',
+    pago: 'Nequi',
+    total: PLAN.precio,
+    detallePlan,
+  });
+
+  btn.disabled = false;
+  btn.textContent = textoOriginal;
+
+  if (!data) {
+    toast('No se pudo activar el plan. Revisa tu conexión.');
+    return;
+  }
+  guardarId(data.pedido.id);
+  toast('¡Plan semanal activado!');
+  cambiarVista('view-ticket');
+}
+
+// ---------- Tickets ----------
 let firmaTickets = '';
 
-// true si el cliente está eligiendo estrellas o escribiendo un comentario:
+// true si el cliente está eligiendo estrellas o comentarios:
 // en ese caso el refresco automático no debe tocar el HTML.
 function ticketEnEdicion() {
   const lista = document.getElementById('lista-tickets');
   if (lista.contains(document.activeElement)) return true;
-  return !!lista.querySelector('.estrellas[data-estrellas]:not([data-estrellas="0"])');
+  if (lista.querySelector('.estrellas[data-estrellas]:not([data-estrellas="0"])')) return true;
+  return !!lista.querySelector('.chip-resena.seleccionada');
+}
+
+function recompensasUsadas() {
+  return parseInt(localStorage.getItem('yogapp_recompensas') || '0', 10) || 0;
+}
+
+function usarRecompensa() {
+  localStorage.setItem('yogapp_recompensas', String(recompensasUsadas() + 1));
+  toast('¡Disfruta tu topping gratis!');
+  cargarMisTickets(true);
 }
 
 async function cargarMisTickets(forzar = false) {
@@ -657,15 +954,16 @@ async function cargarMisTickets(forzar = false) {
   // Sin conexión: conservar lo último que se mostró en vez de borrarlo
   if (errorRed && cont.innerHTML.trim()) return;
 
-  const firma = JSON.stringify(pedidos.map((p) => [p.id, p.estado, p.calificacion ? [p.calificacion.estrellas, p.calificacion.comentario] : 0]));
+  const firma = JSON.stringify(pedidos.map((p) => [
+    p.id,
+    p.estado,
+    p.motivo || '',
+    p.calificacion ? [p.calificacion.estrellas, p.calificacion.comentarios || []] : 0,
+  ]));
   if (!forzar && (firma === firmaTickets || ticketEnEdicion())) return;
   firmaTickets = firma;
 
-  // Puntos de fidelidad: 1 punto por vaso entregado, 10 puntos = vaso gratis
-  const puntos = pedidos.filter((p) => p.estado === 'Entregado').length;
-  document.getElementById('tarjeta-puntos').innerHTML = puntos >= 10
-    ? `<div><div class="puntos-num">${puntos} pts</div><div class="puntos-txt">¡Felicidades! Tienes un vaso GRATIS</div></div><span class="puntos-icono">★</span>`
-    : `<div><div class="puntos-num">${puntos} pts</div><div class="puntos-txt">Faltan ${10 - puntos} puntos para un vaso gratis</div></div><span class="puntos-icono">★</span>`;
+  renderPuntos(pedidos);
 
   cont.innerHTML = ids.map((id) => {
     const p = pedidos.find((x) => x.id === id);
@@ -676,59 +974,174 @@ async function cargarMisTickets(forzar = false) {
       </div>`;
     }
     const entregado = p.estado === 'Entregado';
+    const cancelado = p.estado === 'Cancelado';
+    const color = entregado ? '#2c9e63' : cancelado ? '#c94f4f' : '#b06f1f';
+
+    const detalle = p.detallePlan
+      ? p.detallePlan.map((c) => `${c.dia}: ${c.tipo.replace('Vaso ', '')} · ${c.fruta}`).join('<br>')
+      : `${p.tipo} · ${p.base} · ${p.frutas.join(', ') || 'sin frutas'}${p.cereales.length ? ' · ' + p.cereales.join(', ') : ''} · <strong>$${p.total.toLocaleString('es-CO')}</strong>`;
+
+    let cuerpo;
+    if (cancelado) {
+      cuerpo = `<div class="mini-ticket-desc" style="color:#c94f4f;font-weight:600;">Cancelado · Motivo: ${p.motivo || 'sin motivo'}</div>`;
+    } else if (entregado) {
+      cuerpo = htmlEntregado(p);
+    } else {
+      cuerpo = `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
+         <div class="mensaje-qr">Muestra este QR en el stand para retirar tu vaso</div>
+         <button class="btn-cancelar" onclick="abrirCancelar('${p.id}')">Cancelar pedido</button>`;
+    }
+
     return `<div class="mini-ticket">
       <div class="mini-ticket-top">
         <strong>#${p.id}</strong>
-        <span class="estado-txt" style="color:${entregado ? '#2c9e63' : '#b06f1f'};">${p.estado}</span>
+        <span class="estado-txt" style="color:${color};">${p.estado}</span>
       </div>
-      <div class="mini-ticket-desc">${p.tipo} · ${p.base} · ${p.frutas.join(', ') || 'sin frutas'} · <strong>$${p.total.toLocaleString('es-CO')}</strong></div>
-      ${entregado ? htmlEntregado(p) : `<div class="qr-mini">${qrImg(location.origin + '/entrega?id=' + encodeURIComponent(p.id), 3)}</div>
-         <div class="mensaje-qr">Muestra este QR en el stand para retirar tu vaso</div>`}
+      <div class="mini-ticket-desc">${detalle}</div>
+      ${cuerpo}
     </div>`;
   }).join('');
 }
 
+function renderPuntos(pedidos) {
+  const meta = 5;
+  const calificados = pedidos.filter((p) => p.calificacion).length;
+  const puntos = Math.max(0, calificados - recompensasUsadas());
+  const llenos = Math.min(puntos, meta);
+  const completa = puntos >= meta;
+  const sellos = Array.from({ length: meta }, (_, i) =>
+    `<div class="sello ${i < llenos ? 'lleno' : ''}">${i < llenos ? '★' : '☆'}</div>`).join('');
+
+  document.getElementById('tarjeta-puntos').innerHTML = `
+    <div class="mision ${completa ? 'completa' : ''}">
+      <div class="mision-top">
+        <span class="mision-titulo">${completa ? '¡Recompensa desbloqueada!' : 'Misión: topping gratis'}</span>
+        <span class="mision-contador">${llenos}/${meta}</span>
+      </div>
+      <div class="sellos">${sellos}</div>
+      <div class="mision-barra"><div style="width:${(llenos / meta) * 100}%"></div></div>
+      <div class="mision-txt">${completa
+        ? 'Muestra esta tarjeta en el stand y pide un topping extra gratis.'
+        : `Califica tus pedidos entregados y gana sellos. Te faltan ${meta - llenos} para el topping gratis.`}</div>
+      ${completa ? '<button class="mision-accion" onclick="usarRecompensa()">Ya usé mi topping gratis</button>' : ''}
+    </div>`;
+}
+
 function htmlEntregado(p) {
   if (p.calificacion) {
+    const chips = (p.calificacion.comentarios || []).map((c) => `<span>${c}</span>`).join('');
     return `<div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Entregado. ¡Buen provecho!</div>
       <div class="estrellas-leidas">${'★'.repeat(p.calificacion.estrellas)}${'☆'.repeat(5 - p.calificacion.estrellas)}</div>
-      ${p.calificacion.comentario ? `<div class="mini-ticket-desc">"${p.calificacion.comentario}"</div>` : ''}`;
+      ${chips ? `<div class="resena-chips">${chips}</div>` : ''}
+      <div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Sello ganado ✓</div>`;
   }
   return `<div class="mini-ticket-desc" style="color:#2c9e63;font-weight:600;">Entregado. ¡Buen provecho!</div>
-    <div class="mensaje-qr" style="margin-top:10px;">¿Cómo estuvo tu vaso?</div>
+    <div class="mensaje-qr" style="margin-top:10px;">Califica y gana 1 sello para tu topping gratis</div>
     <div class="estrellas" data-estrellas="0">
       ${[1, 2, 3, 4, 5].map((n) => `<button class="estrella" onclick="pintarEstrellas(this, ${n})">★</button>`).join('')}
     </div>
-    <input class="input-resena" placeholder="Comentario opcional…">
-    <button class="btn-calificar" onclick="calificar('${p.id}', this)">Enviar calificación</button>`;
+    <div class="chips-resena">
+      ${RESENAS_POSITIVAS.map((c) => `<button class="chip-resena" onclick="toggleChipResena(this)">${c}</button>`).join('')}
+      ${RESENAS_NEGATIVAS.map((c) => `<button class="chip-resena negativa" onclick="toggleChipResena(this)">${c}</button>`).join('')}
+    </div>
+    <button class="btn-calificar" disabled onclick="calificar('${p.id}', this)">Enviar calificación</button>`;
 }
 
 function pintarEstrellas(btn, n) {
   const cont = btn.parentElement;
   cont.dataset.estrellas = n;
   [...cont.querySelectorAll('.estrella')].forEach((e, i) => e.classList.toggle('activa', i < n));
+  actualizarBotonCalificar(cont.closest('.mini-ticket'));
+}
+
+function toggleChipResena(el) {
+  el.classList.toggle('seleccionada');
+  actualizarBotonCalificar(el.closest('.mini-ticket'));
+}
+
+function actualizarBotonCalificar(ticket) {
+  const estrellas = parseInt(ticket.querySelector('.estrellas').dataset.estrellas, 10) || 0;
+  const chips = ticket.querySelectorAll('.chip-resena.seleccionada').length;
+  ticket.querySelector('.btn-calificar').disabled = !(estrellas && chips);
 }
 
 async function calificar(id, btn) {
-  const cont = btn.parentElement.querySelector('.estrellas');
-  const estrellas = parseInt(cont.dataset.estrellas, 10);
+  const ticket = btn.closest('.mini-ticket');
+  const estrellas = parseInt(ticket.querySelector('.estrellas').dataset.estrellas, 10);
   if (!estrellas) { toast('Elige las estrellas primero'); return; }
-  const comentario = btn.parentElement.querySelector('.input-resena').value.trim();
+  const comentarios = [...ticket.querySelectorAll('.chip-resena.seleccionada')].map((c) => c.textContent.trim());
+  if (!comentarios.length) { toast('Toca al menos un comentario'); return; }
+
   btn.disabled = true;
   try {
     const res = await fetch('/api/pedidos/' + encodeURIComponent(id) + '/calificar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ estrellas, comentario }),
+      body: JSON.stringify({ estrellas, comentarios }),
     });
     if (!res.ok) throw new Error();
-    toast('¡Gracias por tu calificación!');
+    toast('¡Gracias! Ganaste 1 sello');
     if (document.activeElement) document.activeElement.blur();
     cargarMisTickets(true);
   } catch {
     btn.disabled = false;
     toast('No se pudo enviar la calificación');
   }
+}
+
+// ---------- Cancelación ----------
+let pedidoACancelar = null;
+let motivoCancelar = '';
+
+function abrirCancelar(id) {
+  pedidoACancelar = id;
+  motivoCancelar = '';
+  document.getElementById('paso-1').style.display = 'block';
+  document.getElementById('paso-2').style.display = 'none';
+  document.getElementById('texto-cancelar').textContent = `Vas a cancelar el pedido #${id}.`;
+  document.querySelectorAll('#motivos-cancelar .chip-resena').forEach((c) => c.classList.remove('seleccionada'));
+  document.getElementById('btn-confirmar-cancel').disabled = true;
+  document.getElementById('modal-cancelar').classList.add('abierto');
+}
+
+function cerrarCancelar() {
+  document.getElementById('modal-cancelar').classList.remove('abierto');
+  pedidoACancelar = null;
+}
+
+function irMotivos() {
+  document.getElementById('paso-1').style.display = 'none';
+  document.getElementById('paso-2').style.display = 'block';
+}
+
+function elegirMotivo(el) {
+  document.querySelectorAll('#motivos-cancelar .chip-resena').forEach((c) => c.classList.remove('seleccionada'));
+  el.classList.add('seleccionada');
+  motivoCancelar = el.textContent.trim();
+  document.getElementById('btn-confirmar-cancel').disabled = false;
+}
+
+async function confirmarCancelacion() {
+  if (!pedidoACancelar || !motivoCancelar) return;
+  const id = pedidoACancelar;
+  const btn = document.getElementById('btn-confirmar-cancel');
+  btn.disabled = true;
+  btn.textContent = 'Cancelando…';
+  try {
+    const res = await fetch('/api/pedidos/' + encodeURIComponent(id) + '/cancelar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motivo: motivoCancelar }),
+    });
+    if (!res.ok) throw new Error();
+    cerrarCancelar();
+    toast('Pedido cancelado');
+    cargarMisTickets(true);
+  } catch {
+    toast('No se pudo cancelar el pedido');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Confirmar cancelación';
 }
 
 function nuevoPedido() {
