@@ -280,6 +280,11 @@
     </div>
 
     <div class="panel" style="margin-bottom:20px;">
+      <h2>Métodos de pago</h2>
+      <div id="lista-pagos"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
       <h2>Calificaciones de clientes</h2>
       <div id="lista-resenas"></div>
     </div>
@@ -463,19 +468,14 @@ function renderPedidos(pedidos) {
 
   renderChartProductos(pedidos.filter((p) => p.estado !== 'Cancelado'));
   renderChartHoras(pedidos.filter((p) => p.estado !== 'Cancelado'));
+  renderPagos(pedidos.filter((p) => p.estado !== 'Cancelado'));
   renderResenas(pedidos);
   renderCancelaciones(pedidos);
 }
 
 function renderChartProductos(pedidos) {
   const conteo = {};
-  pedidos.forEach((p) => {
-    if (p.detallePlan) {
-      p.detallePlan.forEach((c) => { conteo[c.tipo] = (conteo[c.tipo] || 0) + 1; });
-    } else {
-      conteo[p.tipo] = (conteo[p.tipo] || 0) + 1;
-    }
-  });
+  pedidos.forEach((p) => { conteo[p.tipo] = (conteo[p.tipo] || 0) + 1; });
   const entradas = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
   const max = Math.max(1, ...entradas.map((e) => e[1]));
   document.getElementById('chart-productos').innerHTML = entradas.length
@@ -485,6 +485,28 @@ function renderChartProductos(pedidos) {
         <div class="barra"><div class="barra-fill" style="width:${(n / max) * 100}%"></div></div>
       </div>`).join('')
     : '<div class="vacio">Sin ventas aún</div>';
+}
+
+function renderPagos(pedidos) {
+  const resumen = {};
+  pedidos.forEach((p) => {
+    const metodo = p.pago || 'Sin dato';
+    if (!resumen[metodo]) resumen[metodo] = { cantidad: 0, total: 0 };
+    resumen[metodo].cantidad++;
+    resumen[metodo].total += p.total;
+  });
+  const entradas = Object.entries(resumen).sort((a, b) => b[1].cantidad - a[1].cantidad);
+  const max = Math.max(1, ...entradas.map((e) => e[1].cantidad));
+  document.getElementById('lista-pagos').innerHTML = entradas.length
+    ? entradas.map(([metodo, r]) => `
+      <div class="inv-item">
+        <div class="inv-info">
+          <span>${metodo}</span>
+          <span class="inv-cant">${r.cantidad} pedido${r.cantidad === 1 ? '' : 's'} · $${r.total.toLocaleString('es-CO')}</span>
+        </div>
+        <div class="barra"><div class="barra-fill" style="width:${(r.cantidad / max) * 100}%"></div></div>
+      </div>`).join('')
+    : '<div class="vacio">Sin pagos registrados</div>';
 }
 
 function renderChartHoras(pedidos) {
@@ -516,7 +538,7 @@ function renderResenas(pedidos) {
       <div class="resena">
         <div class="resena-estrellas">${'★'.repeat(p.calificacion.estrellas)}${'☆'.repeat(5 - p.calificacion.estrellas)}</div>
         ${chips ? `<div class="resena-chips">${chips}</div>` : ''}
-        <div class="resena-meta">#${p.id} · ${p.tipo}</div>
+        <div class="resena-meta">#${p.id} · ${p.tipo} · ${p.pago || 'Sin dato'}</div>
       </div>`;
     }).join('')
     : '<div class="vacio">Aún no hay calificaciones</div>';
